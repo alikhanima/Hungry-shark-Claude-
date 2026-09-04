@@ -156,7 +156,32 @@
   ];
 
   // Custom fish registered by new-fish.js are merged into this list.
-  const CUSTOM_FISH = Array.isArray(window.SHARK_RUSH_CUSTOM_FISH) ? window.SHARK_RUSH_CUSTOM_FISH : [];
+  // Normalize them so a missing optional value can never break the game loop.
+  const CUSTOM_FISH_RAW = Array.isArray(window.SHARK_RUSH_CUSTOM_FISH) ? window.SHARK_RUSH_CUSTOM_FISH : [];
+  const CUSTOM_FISH = CUSTOM_FISH_RAW
+    .filter(f => f && typeof f === 'object')
+    .map((f, i) => ({
+      id: String(f.id || `custom_fish_${i}`),
+      name: String(f.name || `Custom Fish ${i + 1}`),
+      png: f.png || null,
+      _image: f._image || null,
+      r: Number.isFinite(Number(f.r)) ? Math.max(4, Number(f.r)) : 18,
+      pngWidth: Number.isFinite(Number(f.pngWidth)) ? Math.max(4, Number(f.pngWidth)) : undefined,
+      pngHeight: Number.isFinite(Number(f.pngHeight)) ? Math.max(4, Number(f.pngHeight)) : undefined,
+      pngAlpha: Number.isFinite(Number(f.pngAlpha)) ? Math.max(0, Math.min(1, Number(f.pngAlpha))) : 1,
+      tier: Number.isFinite(Number(f.tier)) ? Math.max(0, Math.min(4, Math.round(Number(f.tier)))) : 1,
+      speed: Number.isFinite(Number(f.speed)) ? Math.max(0, Number(f.speed)) : 80,
+      turn: Number.isFinite(Number(f.turn)) ? Math.max(0.1, Number(f.turn)) : 3,
+      xp: Number.isFinite(Number(f.xp)) ? Math.max(1, Number(f.xp)) : 5,
+      coin: Number.isFinite(Number(f.coin)) ? Math.max(1, Number(f.coin)) : 2,
+      behavior: ['school','wander','hide','drift','glide','predator','ambush'].includes(f.behavior) ? f.behavior : 'wander',
+      body: f.body || 'fish',
+      dangerous: !!f.dangerous,
+      dmg: Number.isFinite(Number(f.dmg)) ? Math.max(0, Number(f.dmg)) : 0,
+      // Particle colours are required when the fish gets eaten.
+      colA: typeof f.colA === 'string' && f.colA ? f.colA : '#74e6ff',
+      colB: typeof f.colB === 'string' && f.colB ? f.colB : '#287bb8'
+    }));
   const CREATURES = [
     { id: 'minnow', name: 'Minnow', tier: 0, r: 9, speed: 76, turn: 4.2, xp: 2, coin: 1, body: 'fish', colA: '#8fe3ff', colB: '#2f8fb0', behavior: 'school' },
     { id: 'shrimp', name: 'Shrimp', tier: 0, r: 7, speed: 42, turn: 3, xp: 2, coin: 1, body: 'shrimp', colA: '#ffc2d1', colB: '#d1607f', behavior: 'wander' },

@@ -10,6 +10,8 @@ window.addCustomFish = function (fish) {
   if (!fish || typeof fish !== 'object') return;
   if (fish.png) {
     const img = new Image();
+    img.onload = () => { fish._imageReady = true; };
+    img.onerror = () => { fish._imageFailed = true; console.warn('[Custom Fish] Could not load:', fish.png); };
     img.src = fish.png;
     fish._image = img;
   }
@@ -17,21 +19,7 @@ window.addCustomFish = function (fish) {
 };
 
 /* ======================== ADD CUSTOM PNG FISH HERE ======================== */
-window.addCustomFish({
-  id: 'gold_blue',
-  name: 'Gold_blue',
-  png: 'golden_guppy.png',
-  r: 22,
-  pngWidth: 70,
-  pngHeight: 50,
-  tier: 1,
-  speed: 95,
-  turn: 4,
-  xp: 8,
-  coin: 4,
-  behavior: 'school',
-  body: 'fish'
-});
+
 window.addCustomFish({
   id: 'my_custom_fish',
   name: 'My Custom Fish',
@@ -52,7 +40,11 @@ window.addCustomFish({
   xp: 8,
   coin: 4,
   behavior: 'school',
-  body: 'fish'
+  body: 'fish',
+
+  // Optional eat-particle colours (safe defaults are also added by game.js):
+  colA: '#74e6ff',
+  colB: '#287bb8'
 });
 
 /*
