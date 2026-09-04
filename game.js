@@ -155,6 +155,8 @@
     { title: 'Leviathan', xpToNext: Infinity, scale: 3.40, maxTier: 4, speed: 200 }
   ];
 
+  // Custom fish registered by new-fish.js are merged into this list.
+  const CUSTOM_FISH = Array.isArray(window.SHARK_RUSH_CUSTOM_FISH) ? window.SHARK_RUSH_CUSTOM_FISH : [];
   const CREATURES = [
     { id: 'minnow', name: 'Minnow', tier: 0, r: 9, speed: 76, turn: 4.2, xp: 2, coin: 1, body: 'fish', colA: '#8fe3ff', colB: '#2f8fb0', behavior: 'school' },
     { id: 'shrimp', name: 'Shrimp', tier: 0, r: 7, speed: 42, turn: 3, xp: 2, coin: 1, body: 'shrimp', colA: '#ffc2d1', colB: '#d1607f', behavior: 'wander' },
@@ -170,29 +172,7 @@
     { id: 'sabereel', name: 'Sabertooth Eel', tier: 3, r: 34, speed: 140, turn: 4.2, xp: 36, coin: 13, body: 'eel', colA: '#4c6b3f', colB: '#182714', behavior: 'predator', dangerous: true, dmg: 15 },
     { id: 'voidfin', name: 'Voidfin Colossus', tier: 4, r: 62, speed: 88, turn: 2.4, xp: 92, coin: 40, body: 'predator', colA: '#2c1a34', colB: '#0a060f', behavior: 'predator', dangerous: true, dmg: 30 },
     { id: 'abyssray', name: 'Abyssal Ray', tier: 4, r: 68, speed: 58, turn: 1.6, xp: 96, coin: 42, body: 'ray', colA: '#141c24', colB: '#04070a', behavior: 'glide', dangerous: true, dmg: 28 }
-  ];
-  /* ============================ CUSTOM FISH ============================
-     Add fish in new-fish.js. That file loads first and fills
-     window.SHARK_RUSH_CUSTOM_FISH, so game.js automatically includes them.
-     Supported built-in body types: fish, shrimp, squid, crab, jelly, ray, eel, predator.
-  */
-  const CUSTOM_FISH = Array.isArray(window.SHARK_RUSH_CUSTOM_FISH)
-    ? window.SHARK_RUSH_CUSTOM_FISH
-    : [];
-
-  for (const custom of CUSTOM_FISH) {
-    if (!custom || typeof custom !== 'object') continue;
-    if (!custom.id || CREATURES.some(c => c.id === custom.id)) {
-      console.warn('[Shark Rush] Skipped custom fish with missing/duplicate id:', custom);
-      continue;
-    }
-    if (!Number.isInteger(custom.tier) || custom.tier < 0 || custom.tier >= TIER_NAMES.length) {
-      console.warn('[Shark Rush] Skipped custom fish with invalid tier:', custom.id);
-      continue;
-    }
-    CREATURES.push(custom);
-  }
-
+  ].concat(CUSTOM_FISH);
   const CREATURES_BY_TIER = TIER_NAMES.map((_, i) => CREATURES.filter(c => c.tier === i));
 
   const ZONES = [
@@ -1029,6 +1009,20 @@
     ctx.restore();
   }
 
+  function drawCustomPngFish(c, def, scale) {
+    const img = def._image;
+    if (!img || !img.complete || !img.naturalWidth) return false;
+    const r = def.r * scale;
+    const w = def.pngWidth || r * 2.8;
+    const h = def.pngHeight || r * 2;
+    ctx.save();
+    ctx.scale(c.facing, 1);
+    ctx.globalAlpha = def.pngAlpha == null ? 1 : def.pngAlpha;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+    return true;
+  }
+
   function drawFishLike(c, def, scale) {
     const r = def.r * scale;
     ctx.save();
@@ -1207,6 +1201,7 @@
       ctx.beginPath(); ctx.arc(0, 0, def.r + 10 + pulse * 4, 0, TAU); ctx.stroke();
       ctx.restore();
     }
+    if (def.png && drawCustomPngFish(c, def, 1)) { ctx.restore(); return; }
     switch (def.body) {
       case 'fish': drawFishLike(c, def, 1); break;
       case 'crab': drawCrab(c, def, 1); break;

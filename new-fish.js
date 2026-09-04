@@ -1,49 +1,62 @@
 /* ========================================================================
-   SHARK RUSH — CUSTOM FISH PACK
-   Paste or add your custom fish objects below.
-   game.js reads this file automatically on startup.
+   SHARK RUSH — CUSTOM PNG FISH
+   Put PNG files in the SAME folder as index.html and game.js.
+   Then add a fish below.
    ======================================================================== */
 
 window.SHARK_RUSH_CUSTOM_FISH = window.SHARK_RUSH_CUSTOM_FISH || [];
 
-// Helper: register one fish safely.
 window.addCustomFish = function (fish) {
   if (!fish || typeof fish !== 'object') return;
+  if (fish.png) {
+    const img = new Image();
+    img.src = fish.png;
+    fish._image = img;
+  }
   window.SHARK_RUSH_CUSTOM_FISH.push(fish);
 };
 
-/* ======================== ADD CUSTOM FISH HERE ======================== */
+/* ======================== ADD CUSTOM PNG FISH HERE ======================== */
 
 window.addCustomFish({
-  id: 'golden_guppy',          // Must be unique
-  name: 'Golden Guppy',
-  tier: 1,                     // 0=tiny, 1=small, 2=medium, 3=large, 4=apex
-  r: 18,                       // Size/radius
-  speed: 105,
-  turn: 4.5,
+  id: 'my_custom_fish',
+  name: 'My Custom Fish',
+
+  // PNG FILE IN YOUR MAIN GITHUB FOLDER:
+  png: './my-custom-fish.png',
+
+  // Hitbox / game size:
+  r: 22,
+
+  // Optional PNG display size:
+  pngWidth: 70,
+  pngHeight: 50,
+
+  tier: 1,
+  speed: 95,
+  turn: 4,
   xp: 8,
   coin: 4,
-  body: 'fish',                // fish, shrimp, squid, crab, jelly, ray, eel, predator
-  colA: '#ffe46b',
-  colB: '#e39b24',
-  behavior: 'school'           // school, wander, hide, drift, glide, predator, ambush
+  behavior: 'school',
+  body: 'fish'
 });
 
 /*
-PASTE MORE FISH LIKE THIS:
+COPY/PASTE THIS FOR MORE PNG FISH:
 
 window.addCustomFish({
-  id: 'my_new_fish',
-  name: 'My New Fish',
+  id: 'red_fish',
+  name: 'Red Fish',
+  png: './red-fish.png',
+  r: 25,
+  pngWidth: 80,
+  pngHeight: 55,
   tier: 2,
-  r: 24,
-  speed: 90,
-  turn: 3,
-  xp: 12,
-  coin: 5,
-  body: 'fish',
-  colA: '#00d9ff',
-  colB: '#0066aa',
-  behavior: 'wander'
+  speed: 110,
+  turn: 3.5,
+  xp: 15,
+  coin: 6,
+  behavior: 'wander',
+  body: 'fish'
 });
 */
