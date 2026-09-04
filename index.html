@@ -1,27 +1,230 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shark Rush</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#061923">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Shark Rush</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./game.js" defer></script>
 </head>
 <body>
+  <main id="gameShell" aria-label="Shark Rush game">
     <canvas id="gameCanvas"></canvas>
-    <script src="game.js"></script>
+
+    <!-- Initial tap screen. The game.js removes this after the first tap. -->
+    <section id="bootScreen" class="screen bootScreen">
+      <div class="bootGlow"></div>
+      <div class="bootLogo">
+        <div class="logoEyebrow">WELCOME TO</div>
+        <div class="logoTitle">SHARK <span>RUSH</span></div>
+        <div class="logoTag">EAT • GROW • DOMINATE</div>
+      </div>
+      <div class="bootShark">🦈</div>
+      <div class="tapPrompt">
+        <span class="pulseDot"></span>
+        TAP TO DIVE IN
+      </div>
+      <div class="bootHint">Best experienced in portrait or landscape on iPhone</div>
+    </section>
+
+    <!-- Main menu -->
+    <section id="mainMenu" class="screen hidden">
+      <div class="menuBackdrop"></div>
+      <header class="topBar menuTop">
+        <div class="brand">
+          <span class="brandMark">🦈</span>
+          <div>
+            <div class="brandName">SHARK RUSH</div>
+            <div class="brandSub">UNDERWATER HUNT</div>
+          </div>
+        </div>
+        <div class="chipRow">
+          <div id="menuLevelChip" class="chip levelChip">Lv.1</div>
+          <div id="menuCoinChip" class="chip coinChip"><span class="coinDot">●</span> 0</div>
+        </div>
+      </header>
+
+      <div class="menuContent">
+        <div class="heroCopy">
+          <div class="eyebrow">THE OCEAN IS HUNGRY</div>
+          <h1>Become the<br><strong>APEX.</strong></h1>
+          <p>Hunt smaller creatures, build combos, collect treasure and descend into the abyss.</p>
+        </div>
+
+        <div class="menuActions">
+          <button id="btnPlay" class="primaryBtn giantBtn">
+            <span class="btnIcon">▶</span>
+            <span><b>DIVE IN</b><small>START A NEW HUNT</small></span>
+            <span class="btnArrow">›</span>
+          </button>
+          <div class="actionGrid">
+            <button id="btnShark" class="menuBtn"><span>🦈</span><b>MY SHARK</b><small>STATS</small></button>
+            <button id="btnUpgrades" class="menuBtn"><span>⚡</span><b>UPGRADES</b><small>POWER UP</small></button>
+            <button id="btnMissions" class="menuBtn"><span>◆</span><b>MISSIONS</b><small>REWARDS</small></button>
+            <button id="btnSettings" class="menuBtn"><span>⚙</span><b>SETTINGS</b><small>OPTIONS</small></button>
+          </div>
+        </div>
+      </div>
+      <footer class="menuFooter">SHARK RUSH <span>•</span> VANILLA CANVAS EDITION</footer>
+    </section>
+
+    <!-- In-game HUD -->
+    <section id="hud" class="hud hidden" aria-live="polite">
+      <div class="hudTop">
+        <div class="statPanel levelPanel">
+          <div class="levelBadge"><span>LV</span><b id="levelNum">1</b></div>
+          <div class="xpInfo">
+            <div class="xpLabels"><span>GROWTH</span><span id="xpZoneLabel">Sunlit Reef</span></div>
+            <div class="barTrack xpTrack"><div id="xpFill" class="barFill xpFill"></div></div>
+          </div>
+        </div>
+        <div class="hudRight">
+          <div class="coinHud"><span class="coinDot">●</span><b id="coinNum">0</b></div>
+          <button id="btnPause" class="roundBtn" aria-label="Pause">Ⅱ</button>
+        </div>
+      </div>
+
+      <div class="missionHud">
+        <div class="missionLabel"><span>ACTIVE MISSION</span><b id="missionText">Eat 20 small fish</b></div>
+        <div class="barTrack missionTrack"><div id="missionProgFill" class="barFill missionProgFill"></div></div>
+      </div>
+
+      <div class="needsHud">
+        <div class="needBar healthBar"><span>♥</span><div class="barTrack"><div id="healthFill" class="barFill"></div></div></div>
+        <div class="needBar hungerBar"><span>◉</span><div class="barTrack"><div id="hungerFill" class="barFill"></div></div></div>
+      </div>
+
+      <div id="comboWrap" class="comboWrap"></div>
+
+      <div id="bossBarWrap" class="bossBarWrap hidden">
+        <div class="bossTitle"><span>⚠</span> THE ABYSS WARDEN <span>⚠</span></div>
+        <div class="bossTrack"><div id="bossFill" class="bossFill"></div></div>
+      </div>
+
+      <div id="zoneBanner" class="zoneBanner hidden">
+        <div class="zoneKicker">ENTERING</div>
+        <div id="zoneBannerName">Sunlit Reef</div>
+      </div>
+
+      <div id="bossWarning" class="bossWarning hidden">
+        <div class="warningPulse">⚠</div>
+        <div class="warningTitle">SOMETHING IS HUNTING YOU</div>
+        <div class="warningSub">THE ABYSS WARDEN APPROACHES</div>
+      </div>
+
+      <div id="levelUpOverlay" class="levelUpOverlay hidden">
+        <div class="levelUpFlash"></div>
+        <div class="levelUpKicker">YOU EVOLVED</div>
+        <div class="levelUpBig">LEVEL UP</div>
+        <div class="levelUpNumber">★</div>
+        <div class="levelUpTitle" id="levelUpTitle">Little Hunter</div>
+      </div>
+    </section>
+
+    <!-- Touch controls -->
+    <section id="controls" class="controls hidden">
+      <div id="joystickZone" class="joystickZone" aria-label="Move shark">
+        <div id="joystickBase" class="joystickBase">
+          <div class="joystickOuterRing"></div>
+          <div class="joystickInnerRing"></div>
+          <div id="joystickNub" class="joystickNub"></div>
+        </div>
+      </div>
+      <button id="boostBtn" class="boostBtn" aria-label="Boost">
+        <span class="boostRing" id="boostRing"></span>
+        <span class="boostIcon">»</span>
+        <b>BOOST</b>
+      </button>
+    </section>
+
+    <!-- Shark profile -->
+    <section id="sharkScreen" class="screen panelScreen hidden">
+      <header class="panelHeader">
+        <button class="backBtn" data-back>‹</button>
+        <div><span class="panelKicker">PROFILE</span><h2>MY SHARK</h2></div>
+        <div class="headerSpacer"></div>
+      </header>
+      <div class="profileLayout">
+        <div class="sharkPreviewCard">
+          <div class="previewGlow"></div>
+          <canvas id="sharkPreviewCanvas" width="320" height="220"></canvas>
+          <div class="previewCaption">APEX PREDATOR</div>
+        </div>
+        <div id="sharkStatsList" class="statsList"></div>
+      </div>
+    </section>
+
+    <!-- Upgrades -->
+    <section id="upgradesScreen" class="screen panelScreen hidden">
+      <header class="panelHeader">
+        <button class="backBtn" data-back>‹</button>
+        <div><span class="panelKicker">EVOLVE</span><h2>UPGRADES</h2></div>
+        <div id="upgradeCoins" class="wallet"><i class="ic ic-coin"></i>0</div>
+      </header>
+      <div class="panelIntro">Spend coins to make every hunt more dangerous.</div>
+      <div id="upgradesList" class="upgradeList"></div>
+    </section>
+
+    <!-- Missions -->
+    <section id="missionsScreen" class="screen panelScreen hidden">
+      <header class="panelHeader">
+        <button class="backBtn" data-back>‹</button>
+        <div><span class="panelKicker">OBJECTIVES</span><h2>MISSIONS</h2></div>
+        <div class="headerSpacer"></div>
+      </header>
+      <div class="panelIntro">Complete objectives to earn bonus XP and coins.</div>
+      <div id="missionsList" class="missionList"></div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settingsScreen" class="screen panelScreen hidden">
+      <header class="panelHeader">
+        <button class="backBtn" data-back>‹</button>
+        <div><span class="panelKicker">OPTIONS</span><h2>SETTINGS</h2></div>
+        <div class="headerSpacer"></div>
+      </header>
+      <div class="settingsList">
+        <button id="toggleSFX" class="settingRow" data-on="1"><span><b>Sound Effects</b><small>Bites, coins and UI sounds</small></span><i class="toggle"><em></em></i></button>
+        <button id="toggleAmbience" class="settingRow" data-on="1"><span><b>Ocean Ambience</b><small>Low underwater atmosphere</small></span><i class="toggle"><em></em></i></button>
+        <button id="toggleShake" class="settingRow" data-on="1"><span><b>Screen Shake</b><small>Impact feedback during combat</small></span><i class="toggle"><em></em></i></button>
+        <button id="toggleHaptics" class="settingRow" data-on="1"><span><b>Haptics</b><small>Vibration feedback on supported devices</small></span><i class="toggle"><em></em></i></button>
+      </div>
+      <button id="btnResetSave" class="dangerBtn">RESET ALL PROGRESS</button>
+      <div class="settingsNote">Your progress is stored locally on this device using browser storage.</div>
+    </section>
+
+    <!-- Pause -->
+    <section id="pauseMenu" class="screen overlayScreen hidden">
+      <div class="pauseCard">
+        <div class="pauseMark">Ⅱ</div>
+        <div class="panelKicker">HUNT PAUSED</div>
+        <h2>TAKE A BREATH.</h2>
+        <p>The ocean will wait. Your prey won't.</p>
+        <button id="btnResume" class="primaryBtn wideBtn"><span>▶</span><b>RESUME HUNT</b></button>
+        <button id="btnPauseSettings" class="secondaryBtn wideBtn">⚙ SETTINGS</button>
+        <button id="btnPauseMainMenu" class="textBtn">RETURN TO MENU</button>
+      </div>
+    </section>
+
+    <!-- Game over -->
+    <section id="gameOverScreen" class="screen overlayScreen hidden">
+      <div class="gameOverCard">
+        <div class="defeatIcon">☠</div>
+        <div class="panelKicker">THE HUNT ENDS</div>
+        <h2>YOU WERE<br><strong>OUTMATCHED.</strong></h2>
+        <div id="gameOverStats" class="statsList compactStats"></div>
+        <div class="gameOverActions">
+          <button id="btnRetry" class="primaryBtn wideBtn"><span>↻</span><b>HUNT AGAIN</b></button>
+          <button id="btnGameOverMenu" class="secondaryBtn wideBtn">MAIN MENU</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="toastContainer" class="toastContainer" aria-live="polite"></div>
+  </main>
 </body>
 </html>
