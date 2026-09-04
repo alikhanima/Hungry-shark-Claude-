@@ -17,7 +17,21 @@ window.addCustomFish = function (fish) {
 };
 
 /* ======================== ADD CUSTOM PNG FISH HERE ======================== */
-
+window.addCustomFish({
+  id: 'gold_blue',
+  name: 'Gold_blue',
+  png: './custom-fish-clean.png',
+  r: 22,
+  pngWidth: 70,
+  pngHeight: 50,
+  tier: 1,
+  speed: 95,
+  turn: 4,
+  xp: 8,
+  coin: 4,
+  behavior: 'school',
+  body: 'fish'
+});
 window.addCustomFish({
   id: 'my_custom_fish',
   name: 'My Custom Fish',
