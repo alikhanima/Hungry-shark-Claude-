@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>RIPTOOTH — Deep Hunger</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Manrope:wght@500;700;800&display=swap');
+
+:root{
+  --abyss:#061A2B;
+  --tide:#0E3A5C;
+  --kelp:#146464;
+  --cyan:#4DEFD8;
+  --amber:#FF9B4D;
+  --danger:#FF5C5C;
+  --foam:#EAF6F6;
+  --gold:#FFD37A;
+  --f-display:'Fredoka','Arial Rounded MT Bold','Segoe UI',system-ui,sans-serif;
+  --f-body:'Manrope','Segoe UI',system-ui,sans-serif;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none;}
+html,body{
+  margin:0; padding:0; width:100%; height:100%;
+  overflow:hidden; position:fixed; inset:0;
+  background:var(--abyss);
+  font-family:var(--f-body);
+  color:var(--foam);
+  touch-action:none;
+  overscroll-behavior:none;
+}
+#c{position:fixed; inset:0; display:block; width:100%; height:100%; touch-action:none;}
+
+/* ---------- shared panel look: porthole glass ---------- */
+.porthole{
+  background:linear-gradient(180deg, rgba(14,58,92,.92), rgba(6,26,43,.96));
+  border:2px solid rgba(77,239,216,.35);
+  border-radius:22px;
+  box-shadow:0 0 0 6px rgba(255,255,255,.03), 0 18px 40px rgba(0,0,0,.5), inset 0 0 30px rgba(77,239,216,.06);
+  backdrop-filter:blur(6px);
+}
+.btn{
+  font-family:var(--f-display);
+  font-weight:600;
+  letter-spacing:.02em;
+  border:none;
+  border-radius:16px;
+  padding:14px 22px;
+  font-size:17px;
+  color:var(--abyss);
+  background:linear-gradient(180deg, var(--cyan), #33C9B6);
+  box-shadow:0 5px 0 #1b8f7f, 0 10px 18px rgba(0,0,0,.35);
+  cursor:pointer;
+  transition:transform .08s ease;
+}
+.btn:active{transform:translateY(3px); box-shadow:0 2px 0 #1b8f7f, 0 5px 10px rgba(0,0,0,.3);}
+.btn.secondary{
+  background:linear-gradient(180deg, #2a5578, #17394f);
+  color:var(--foam);
+  box-shadow:0 5px 0 #0c2233, 0 10px 18px rgba(0,0,0,.35);
+}
+.btn.secondary:active{box-shadow:0 2px 0 #0c2233, 0 5px 10px rgba(0,0,0,.3);}
+.btn.warn{
+  background:linear-gradient(180deg, var(--amber), #d9762a);
+  box-shadow:0 5px 0 #a35418, 0 10px 18px rgba(0,0,0,.35);
+}
+.btn.warn:active{box-shadow:0 2px 0 #a35418, 0 5px 10px rgba(0,0,0,.3);}
+.btn:disabled{filter:grayscale(.6); opacity:.55; box-shadow:none; transform:none;}
+
+/* ---------- loading ---------- */
+#loading{
+  position:fixed; inset:0; z-index:100;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at 50% 20%, #123a52 0%, #061A2B 65%, #030d17 100%);
+}
+#loading .fin{
+  width:64px; height:64px; margin-bottom:18px;
+  border-radius:0 60% 0 60%;
+  background:linear-gradient(135deg, var(--cyan), #1b8f7f);
+  animation:swim 1.4s ease-in-out infinite;
+}
+@keyframes swim{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(8deg) translateY(-10px)}}
+#loading h1{font-family:var(--f-display); font-size:26px; margin:0 0 6px; letter-spacing:.04em;}
+#loading p{opacity:.6; font-size:13px; margin:0;}
+
+/* ---------- main menu ---------- */
+#menu{
+  position:fixed; inset:0; z-index:90;
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  padding:24px calc(24px + var(--safe-r)) calc(24px + var(--safe-b)) calc(24px + var(--safe-l));
+  background:radial-gradient(ellipse at 50% 0%, #164a63 0%, #08283e 55%, #030c16 100%);
+  text-align:center;
+  gap:10px;
+}
+#menu .title-wrap{margin-bottom:6px;}
+#menu h1{
+  font-family:var(--f-display); font-size:clamp(38px,11vw,58px); margin:0;
+  letter-spacing:.03em; color:var(--foam);
+  text-shadow:0 0 26px rgba(77,239,216,.55), 0 6px 0 rgba(0,0,0,.35);
+}
+#menu .tagline{font-size:14px; opacity:.65; margin-top:2px; letter-spacing:.04em;}
+#menu .menu-stats{
+  display:flex; gap:10px; margin:18px 0 6px;
+}
+#menu .stat-pill{
+  padding:8px 14px; border-radius:14px;
+  background:rgba(77,239,216,.08); border:1px solid rgba(77,239,216,.25);
+  font-size:13px; font-weight:700;
+}
+#menu .menu-buttons{display:flex; flex-direction:column; gap:12px; width:min(320px,80vw); margin-top:10px;}
+#menu .menu-buttons .btn{width:100%;}
+#menu .foot-links{display:flex; gap:18px; margin-top:22px; font-size:12px; opacity:.55;}
+#menu .foot-links span{cursor:pointer; text-decoration:underline;}
+#menu .swimmers{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:-1;}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed; inset:0; z-index:40; display:none; pointer-events:none;}
+#hud .top-row{
+  position:absolute; top:calc(10px + var(--safe-t)); left:calc(10px + var(--safe-l)); right:calc(10px + var(--safe-r));
+  display:flex; align-items:flex-start; gap:10px;
+}
+.level-badge{
+  pointer-events:auto;
+  width:52px; height:52px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #2f7f99, #0c2c40);
+  border:3px solid var(--cyan);
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
+  flex-shrink:0;
+}
+.level-badge .lv-num{font-family:var(--f-display); font-size:20px; line-height:1;}
+.level-badge .lv-tag{font-size:7px; letter-spacing:.03em; opacity:.7; margin-top:-1px;}
+.bars-col{flex:1; display:flex; flex-direction:column; gap:5px; padding-top:3px; min-width:0;}
+.bar-track{
+  height:9px; border-radius:6px; background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12); overflow:hidden; position:relative;
+}
+.bar-fill{height:100%; border-radius:6px; transition:width .25s ease;}
+#health-fill{background:linear-gradient(90deg,#ff5c5c,#ff9b4d);}
+#hunger-fill{background:linear-gradient(90deg,#4defd8,#33a6c9);}
+.bar-label{font-size:8px; opacity:.55; letter-spacing:.05em; margin-bottom:1px;}
+.right-col{display:flex; flex-direction:column; gap:8px; align-items:flex-end; flex-shrink:0;}
+.coin-pill{
+  pointer-events:auto;
+  display:flex; align-items:center; gap:6px;
+  background:rgba(6,26,43,.75); border:1px solid rgba(255,211,122,.4);
+  padding:7px 12px; border-radius:14px; font-family:var(--f-display); font-size:15px; font-weight:600;
+}
+.coin-pill .dot{width:9px; height:9px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff2c8,var(--gold)); box-shadow:0 0 8px rgba(255,211,122,.7);}
+.icon-btn{
+  pointer-events:auto;
+  width:38px; height:38px; border-radius:50%;
+  background:rgba(6,26,43,.75); border:1px solid rgba(77,239,216,.35);
+  display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;
+}
+
+#minimap-wrap{
+  position:absolute; top:calc(70px + var(--safe-t)); left:calc(10px + var(--safe-l));
+  pointer-events:auto; display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+#minimap{
+  width:92px; height:92px; border-radius:50%;
+  border:3px solid rgba(77,239,216,.4);
+  box-shadow:0 4px 14px rgba(0,0,0,.45), inset 0 0 14px rgba(0,0,0,.5);
+  background:#08202f;
+}
+#zone-pill{
+  font-size:9px; font-weight:700; letter-spacing:.03em; padding:3px 8px; border-radius:8px;
+  background:rgba(6,26,43,.75); border:1px solid rgba(77,239,216,.3); white-space:nowrap;
+}
+
+#objectives-btn{
+  position:absolute; top:calc(70px + var(--safe-t)); right:calc(10px + var(--safe-r));
+  pointer-events:auto;
+  background:rgba(6,26,43,.75); border:1px solid rgba(255,211,122,.35);
+  border-radius:14px; padding:8px 10px; font-size:11px; font-weight:700; text-align:left;
+  max-width:150px;
+}
+#objectives-btn .obj-title{font-size:9px; opacity:.6; letter-spacing:.04em; margin-bottom:3px;}
+#objectives-btn .obj-line{font-size:10.5px; line-height:1.5; opacity:.92; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+#objectives-btn .obj-line.done{opacity:.4; text-decoration:line-through;}
+
+#zone-toast{
+  position:absolute; top:calc(46% - 10px); left:50%; transform:translate(-50%,-50%);
+  font-family:var(--f-display); font-size:22px; letter-spacing:.04em;
+  text-shadow:0 0 20px rgba(77,239,216,.7), 0 3px 8px rgba(0,0,0,.6);
+  opacity:0; pointer-events:none; transition:opacity .5s ease, transform .5s ease;
+  text-align:center;
+}
+#zone-toast.show{opacity:1;}
+#zone-toast small{display:block; font-family:var(--f-body); font-size:12px; font-weight:700; opacity:.75; margin-top:2px; letter-spacing:.08em;}
+
+#toast-container{
+  position:absolute; top:calc(120px + var(--safe-t)); left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px; pointer-events:none; width:min(320px,84vw);
+}
+.toast{
+  background:rgba(6,26,43,.88); border:1px solid rgba(77,239,216,.4);
+  padding:8px 16px; border-radius:12px; font-size:13px; font-weight:700; text-align:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.4);
+  animation:toastIn .25s ease;
+}
+.toast.gold{border-color:rgba(255,211,122,.5); color:var(--gold);}
+.toast.warn{border-color:rgba(255,92,92,.5); color:#ffb3b3;}
+@keyframes toastIn{from{opacity:0; transform:translateY(-8px) scale(.95);} to{opacity:1; transform:translateY(0) scale(1);}}
+.toast.fade{opacity:0; transform:translateY(-6px); transition:opacity .35s ease, transform .35s ease;}
+
+#vignette{position:fixed; inset:0; z-index:35; pointer-events:none; opacity:0; background:radial-gradient(ellipse at 50% 50%, rgba(255,60,60,0) 45%, rgba(255,30,30,.55) 100%); transition:opacity .12s ease;}
+#vignette.hit{opacity:1;}
+
+/* ---------- controls ---------- */
+#controls{position:fixed; inset:0; z-index:45; display:none; pointer-events:none;}
+#joy-base{
+  position:absolute; left:calc(26px + var(--safe-l)); bottom:calc(30px + var(--safe-b));
+  width:118px; height:118px; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, rgba(77,239,216,.14), rgba(6,26,43,.55));
+  border:2px solid rgba(77,239,216,.35);
+  pointer-events:auto; touch-action:none;
+}
+#joy-nub{
+  position:absolute; left:50%; top:50%; width:52px; height:52px; margin:-26px 0 0 -26px;
+  border-radius:50%; background:linear-gradient(180deg, var(--cyan), #1b8f7f);
+  box-shadow:0 4px 10px rgba(0,0,0,.4);
+}
+#boost-btn{
+  position:absolute; right:calc(28px + var(--safe-r)); bottom:calc(34px + var(--safe-b));
+  width:88px; height:88px; border-radius:50%;
+  pointer-events:auto; touch-action:none;
+  background:conic-gradient(var(--amber) calc(var(--stam,100)*1%), rgba(255,255,255,.08) 0);
+  padding:5px;
+  display:flex; align-items:center; justify-content:center;
+}
+#boost-btn .inner{
+  width:100%; height:100%; border-radius:50%;
+  background:radial-gradient(circle at 38% 32%, #ffcf9e, #d9762a 70%);
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  box-shadow:inset 0 0 14px rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.4);
+}
+#boost-btn .inner span{font-family:var(--f-display); font-size:11px; font-weight:700; color:#4a2405; letter-spacing:.04em;}
+#boost-btn.active .inner{background:radial-gradient(circle at 38% 32%, #fff2c8, var(--gold) 70%);}
+
+/* ---------- modals ---------- */
+.modal-wrap{
+  position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center;
+  background:rgba(2,10,18,.72); padding:20px calc(20px + var(--safe-r)) calc(20px + var(--safe-b)) calc(20px + var(--safe-l));
+}
+.modal-wrap.show{display:flex;}
+.modal{width:min(400px,100%); max-height:88vh; overflow-y:auto; padding:22px; position:relative;}
+.modal h2{font-family:var(--f-display); font-size:23px; margin:0 0 4px; letter-spacing:.02em;}
+.modal .sub{font-size:12.5px; opacity:.6; margin:0 0 16px;}
+.modal-close{position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px;}
+.modal .btn{width:100%; margin-top:8px;}
+
+.shop-row{
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  border-radius:14px; padding:10px 12px; margin-bottom:10px;
+}
+.shop-row .icon{font-size:22px; width:34px; text-align:center; flex-shrink:0;}
+.shop-row .info{flex:1; min-width:0;}
+.shop-row .name{font-weight:800; font-size:14px;}
+.shop-row .desc{font-size:11px; opacity:.6; margin-top:1px;}
+.shop-row .pips{display:flex; gap:3px; margin-top:5px;}
+.shop-row .pip{width:14px; height:6px; border-radius:3px; background:rgba(255,255,255,.15);}
+.shop-row .pip.filled{background:var(--cyan);}
+.shop-row .buy-btn{
+  flex-shrink:0; font-family:var(--f-display); font-weight:600; font-size:12px;
+  padding:9px 12px; border-radius:12px; border:none; cursor:pointer;
+  background:linear-gradient(180deg, var(--gold), #d9a020); color:#4a2f05;
+  box-shadow:0 3px 0 #a37518;
+  min-width:64px;
+}
+.shop-row .buy-btn:active{transform:translateY(2px); box-shadow:none;}
+.shop-row .buy-btn:disabled{background:rgba(255,255,255,.1); color:rgba(255,255,255,.35); box-shadow:none;}
+
+.tut-line{display:flex; gap:10px; align-items:flex-start; margin-bottom:14px; font-size:13.5px; line-height:1.45;}
+.tut-line .ti{font-size:20px; flex-shrink:0;}
+
+#gameover-modal .go-stats{display:flex; justify-content:space-between; gap:8px; margin:16px 0; flex-wrap:wrap;}
+.go-stat{flex:1; min-width:90px; background:rgba(255,255,255,.05); border-radius:12px; padding:10px; text-align:center;}
+.go-stat .n{font-family:var(--f-display); font-size:20px; color:var(--cyan);}
+.go-stat .l{font-size:9px; opacity:.6; letter-spacing:.04em; margin-top:2px;}
+
+#pause-modal .pause-menu-buttons{display:flex; flex-direction:column; gap:10px;}
+.sound-row{display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,.04); padding:12px 14px; border-radius:14px; margin-bottom:10px; font-weight:700; font-size:13px;}
+.toggle{width:44px; height:24px; border-radius:14px; background:rgba(255,255,255,.15); position:relative; cursor:pointer; flex-shrink:0;}
+.toggle .knob{position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .15s ease;}
+.toggle.on{background:var(--cyan);}
+.toggle.on .knob{left:22px;}
+
+#reset-link.confirming{color:var(--danger); opacity:1; text-decoration:none; font-weight:800;}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div id="vignette"></div>
+
+<div id="loading">
+  <div class="fin"></div>
+  <h1>RIPTOOTH</h1>
+  <p id="loading-sub">Filling the tide&hellip;</p>
+</div>
+
+<div id="menu">
+  <div class="swimmers" id="menu-swimmers"></div>
+  <div class="title-wrap">
+    <h1>RIPTOOTH</h1>
+    <div class="tagline">Grow. Hunt. Rule the Deep.</div>
+  </div>
+  <div class="menu-stats">
+    <div class="stat-pill" id="menu-level-pill">Lv 1 Hatchling</div>
+    <div class="stat-pill" id="menu-coin-pill">0 Pearls</div>
+  </div>
+  <div class="menu-buttons">
+    <button class="btn" id="play-btn">PLAY</button>
+    <button class="btn secondary" id="shop-btn-menu">UPGRADE SHOP</button>
+    <button class="btn secondary" id="howto-btn">HOW TO SWIM</button>
+  </div>
+  <div class="foot-links">
+    <span id="sound-link">Sound: On</span>
+    <span id="reset-link">Reset Progress</span>
+  </div>
+</div>
+
+<div id="hud">
+  <div class="top-row">
+    <div class="level-badge" id="level-badge">
+      <div class="lv-num" id="lv-num">1</div>
+      <div class="lv-tag" id="lv-tag">PUP</div>
+    </div>
+    <div class="bars-col">
+      <div>
+        <div class="bar-label">HEALTH</div>
+        <div class="bar-track"><div class="bar-fill" id="health-fill" style="width:100%"></div></div>
+      </div>
+      <div>
+        <div class="bar-label">HUNGER</div>
+        <div class="bar-track"><div class="bar-fill" id="hunger-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="right-col">
+      <div style="display:flex; gap:8px;">
+        <div class="coin-pill"><div class="dot"></div><span id="coin-num">0</span></div>
+        <div class="icon-btn" id="pause-btn">&#10074;&#10074;</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="minimap-wrap">
+    <canvas id="minimap" width="120" height="120"></canvas>
+    <div id="zone-pill">Sunlit Flats</div>
+  </div>
+
+  <div id="objectives-btn">
+    <div class="obj-title">OBJECTIVES</div>
+    <div id="obj-list"></div>
+  </div>
+
+  <div id="zone-toast">Zone<small>subtitle</small></div>
+  <div id="toast-container"></div>
+</div>
+
+<div id="controls">
+  <div id="joy-base"><div id="joy-nub"></div></div>
+  <div id="boost-btn" style="--stam:100"><div class="inner"><span>BOOST</span></div></div>
+</div>
+
+<!-- Tutorial Modal -->
+<div class="modal-wrap" id="tutorial-modal">
+  <div class="modal porthole">
+    <div class="modal-close" data-close="tutorial-modal">&#10005;</div>
+    <h2>How to Swim</h2>
+    <div class="sub">Everything you need to rule the reef.</div>
+    <div class="tut-line"><div class="ti">&#128073;</div><div>Drag the <b>left stick</b> to steer. Push it forward to dive deep, pull back to rise toward the surface.</div></div>
+    <div class="tut-line"><div class="ti">&#9889;</div><div>Hold <b>BOOST</b> for a burst of speed. Watch the amber ring &mdash; that's your stamina.</div></div>
+    <div class="tut-line"><div class="ti">&#128375;</div><div>Anything smaller with a soft <b>cyan glow</b> is food. Swim into it to eat.</div></div>
+    <div class="tut-line"><div class="ti">&#9888;&#65039;</div><div>Anything bigger with an <b>amber warning outline</b> will hunt YOU. Flee, or grow strong enough to turn the tables.</div></div>
+    <div class="tut-line"><div class="ti">&#128165;</div><div>Keep <b>Hunger</b> up by eating, or your <b>Health</b> starts draining. Earn Pearls to upgrade your Riptooth between dives.</div></div>
+    <button class="btn" data-close="tutorial-modal">GOT IT</button>
+  </div>
+</div>
+
+<!-- Shop Modal -->
+<div class="modal-wrap" id="shop-modal">
+  <div class="modal porthole">
+    <div class="modal-close" data-close="shop-modal">&#10005;</div>
+    <h2>Upgrade Shop</h2>
+    <div class="sub">Spend Pearls to strengthen your Riptooth.</div>
+    <div id="shop-list"></div>
+  </div>
+</div>
+
+<!-- Pause Modal -->
+<div class="modal-wrap" id="pause-modal">
+  <div class="modal porthole">
+    <div class="modal-close" data-close="pause-modal">&#10005;</div>
+    <h2>Paused</h2>
+    <div class="sub">Take a breath.</div>
+    <div class="sound-row"><span>Sound</span><div class="toggle on" id="sound-toggle"><div class="knob"></div></div></div>
+    <div class="pause-menu-buttons">
+      <button class="btn" data-close="pause-modal">RESUME</button>
+      <button class="btn secondary" id="shop-btn-pause">UPGRADE SHOP</button>
+      <button class="btn secondary" id="howto-btn-pause">HOW TO SWIM</button>
+      <button class="btn warn" id="quit-btn">QUIT TO MENU</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game Over Modal -->
+<div class="modal-wrap" id="gameover-modal">
+  <div class="modal porthole">
+    <h2 id="go-title">Bitten Off the Food Chain</h2>
+    <div class="sub" id="go-sub">A bigger predator got the better of you this time.</div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="n" id="go-level">1</div><div class="l">LEVEL</div></div>
+      <div class="go-stat"><div class="n" id="go-coins">0</div><div class="l">PEARLS EARNED</div></div>
+      <div class="go-stat"><div class="n" id="go-biggest">&mdash;</div><div class="l">BIGGEST MEAL</div></div>
+    </div>
+    <button class="btn" id="respawn-btn">RESPAWN</button>
+    <button class="btn secondary" id="go-menu-btn">BACK TO MENU</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ================================================================
+   RIPTOOTH — Deep Hunger
+   Original 3D underwater arcade game. All code, names, creatures
+   and art are original work. Built with Three.js (r128) + WebAudio.
+   ================================================================ */
+(function(){ 'use strict';
+
+/* ============================== UTIL ============================== */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const randInt=(a,b)=>Math.floor(rand(a,b+1));
+const choice=arr=>arr[Math.floor(Math.random()*arr.length)];
+const dist2D=(ax,az,bx,bz)=>Math.hypot(ax-bx,az-bz);
+
+/* ============================== AUDIO ============================== */
+const SFX = (()=>{
+  let ctx=null, master=null, sfxGain=null, musicGain=null, noiseBuf=null, ready=false, enabled=true, ambientStarted=false;
+  function init(){
+    if(ready) return;
+    try{
+      const AC = window.AudioContext||window.webkitAudioContext;
+      ctx = new AC();
+      master = ctx.createGain(); master.gain.value = enabled?0.9:0; master.connect(ctx.destination);
+      sfxGain = ctx.createGain(); sfxGain.gain.value=0.85; sfxGain.connect(master);
+      musicGain = ctx.createGain(); musicGain.gain.value=0.3; musicGain.connect(master);
+      const len = ctx.sampleRate*1;
+      noiseBuf = ctx.createBuffer(1,len,ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+      ready=true;
+    }catch(e){ ready=false; }
+  }
+  function resume(){ if(ctx && ctx.state==='suspended') ctx.resume().catch(()=>{}); }
+  function setEnabled(v){ enabled=v; if(master) master.gain.setTargetAtTime(v?0.9:0, ctx.currentTime, 0.05); }
+  function tone(freq,dur,type,vol,glideTo,delay){
+    if(!ready||!enabled) return;
+    const t0=ctx.currentTime+(delay||0);
+    const o=ctx.createOscillator(); o.type=type||'sine'; o.frequency.setValueAtTime(freq,t0);
+    if(glideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20,glideTo), t0+dur);
+    const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.001,vol||0.3), t0+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    o.connect(g); g.connect(sfxGain);
+    o.start(t0); o.stop(t0+dur+0.03);
+  }
+  function noiseBurst(dur,vol,filterFreq){
+    if(!ready||!enabled) return;
+    const t0=ctx.currentTime;
+    const src=ctx.createBufferSource(); src.buffer=noiseBuf;
+    const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=filterFreq||1200; f.Q.value=0.9;
+    const g=ctx.createGain(); g.gain.setValueAtTime(vol||0.4,t0);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    src.connect(f); f.connect(g); g.connect(sfxGain);
+    src.start(t0); src.stop(t0+dur+0.03);
+  }
+  function startAmbient(){
+    if(!ready||ambientStarted) return;
+    ambientStarted=true;
+    const o1=ctx.createOscillator(); o1.type='sine'; o1.frequency.value=54;
+    const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=67;
+    const g=ctx.createGain(); g.gain.value=0.0;
+    g.gain.linearRampToValueAtTime(0.16, ctx.currentTime+3);
+    o1.connect(g); o2.connect(g); g.connect(musicGain);
+    o1.start(); o2.start();
+    let phase=0;
+    setInterval(()=>{ if(!ready) return; phase+=0.2; try{ g.gain.linearRampToValueAtTime(0.10+Math.sin(phase)*0.05, ctx.currentTime+2);}catch(e){} }, 2200);
+  }
+  return {
+    init(){ init(); startAmbient(); }, resume, setEnabled,
+    click:()=>tone(720,0.06,'square',0.14),
+    eat:()=>{ tone(520,0.08,'triangle',0.22,940); },
+    bite:()=>noiseBurst(0.1,0.3,1800),
+    boost:()=>tone(150,0.3,'sawtooth',0.16,480),
+    damage:()=>{ tone(220,0.22,'sawtooth',0.28,80); noiseBurst(0.14,0.22,600); },
+    levelUp:()=>{ [440,660,880].forEach((f,i)=>tone(f,0.22,'triangle',0.26,null,i*0.11)); },
+    mission:()=>{ tone(600,0.12,'triangle',0.2); tone(920,0.16,'triangle',0.2,null,0.1); },
+    bossAlert:()=>{ tone(85,0.9,'sawtooth',0.28,46); noiseBurst(0.4,0.18,300); },
+    ram:()=>noiseBurst(0.13,0.36,700),
+    defeat:()=>{ [220,330,440,660].forEach((f,i)=>tone(f,0.16,'square',0.2,null,i*0.08)); },
+    treasure:()=>{ [660,880,1100].forEach((f,i)=>tone(f,0.14,'sine',0.22,null,i*0.06)); }
+  };
+})();
+
+/* ============================== SAVE SYSTEM ============================== */
+function defaultProfile(){
+  return {
+    level:1, xp:0, coins:0,
+    upgrades:{speed:0,health:0,bite:0,boost:0,growth:0,energy:0,magnet:0},
+    settings:{sound:true},
+    stats:{totalEaten:0, bossKills:0},
+    achievements:{}
+  };
+}
+let profile = defaultProfile();
+let saveDirty = false;
+function markDirty(){ saveDirty=true; }
+async function loadProfile(){
+  try{
+    const res = await window.storage.get('riptooth-profile', false);
+    if(res && res.value){
+      const p = JSON.parse(res.value);
+      const d = defaultProfile();
+      profile = Object.assign(d, p);
+      profile.upgrades = Object.assign(d.upgrades, p.upgrades||{});
+      profile.stats = Object.assign(d.stats, p.stats||{});
+      profile.settings = Object.assign(d.settings, p.settings||{});
+      profile.achievements = Object.assign({}, p.achievements||{});
+    }
+  }catch(e){ /* first run, no save yet */ }
+}
+async function persistProfile(){
+  try{ await window.storage.set('riptooth-profile', JSON.stringify(profile), false); saveDirty=false; }
+  catch(e){ console.error('Riptooth: save failed', e); }
+}
+setInterval(()=>{ if(saveDirty && running) persistProfile(); }, 6000);
+window.addEventListener('pagehide', ()=>{ if(saveDirty) persistProfile(); });
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden && saveDirty) persistProfile(); });
+
+/* ============================== CONFIG: LEVELS ============================== */
+const LEVELS=[
+  {n:1, name:'Hatchling',       tag:'PUP',  xp:0,    size:1.00, hp:60,  bite:8,  spd:1.00, eatTier:1},
+  {n:2, name:'Finling',         tag:'FIN',  xp:40,   size:1.22, hp:80,  bite:12, spd:1.05, eatTier:1},
+  {n:3, name:'Reef Runner',     tag:'RUN',  xp:110,  size:1.50, hp:106, bite:17, spd:1.10, eatTier:2},
+  {n:4, name:'Current Rider',   tag:'RIDE', xp:220,  size:1.82, hp:136, bite:23, spd:1.15, eatTier:2},
+  {n:5, name:'Deep Diver',      tag:'DIVE', xp:380,  size:2.18, hp:170, bite:30, spd:1.20, eatTier:3},
+  {n:6, name:'Trench Stalker',  tag:'STLK', xp:600,  size:2.58, hp:210, bite:38, spd:1.27, eatTier:3},
+  {n:7, name:'Apex',            tag:'APEX', xp:900,  size:3.02, hp:255, bite:47, spd:1.34, eatTier:4},
+  {n:8, name:'Megamouth',       tag:'MEGA', xp:1300, size:3.50, hp:305, bite:57, spd:1.41, eatTier:4},
+  {n:9, name:'Leviathan',       tag:'LEVI', xp:1850, size:4.05, hp:360, bite:68, spd:1.50, eatTier:5},
+  {n:10,name:'Abyss Sovereign', tag:'SVRN', xp:2600, size:4.60, hp:420, bite:80, spd:1.60, eatTier:5},
+];
+
+/* ============================== CONFIG: ZONES ============================== */
+const ZONE_LIST=[
+  {id:'flats',  idx:0, name:'Sunlit Flats',   sub:'BRIGHT & SHALLOW', yHigh:-2,   yLow:-46,  fog:0x6fc9d6, density:0.0060, sky:0x8fdcE6, ground:0x0e3a5c, sun:1.00, floor:0xd8c68a},
+  {id:'kelp',   idx:1, name:'Kelp Forest',    sub:'SWAYING SHADOWS',  yHigh:-46,  yLow:-96,  fog:0x1f5c56, density:0.0095, sky:0x2c6e64, ground:0x0a2e2e, sun:0.68, floor:0x6a7a4a},
+  {id:'ruins',  idx:2, name:'Sunken Ruins',   sub:'OLD BONES OF STONE', yHigh:-96,yLow:-156, fog:0x163a54, density:0.0135, sky:0x1f4a63, ground:0x0a1f30, sun:0.44, floor:0x7a7568},
+  {id:'trench', idx:3, name:'Deep Trench',    sub:'PRESSURE RISING',  yHigh:-156, yLow:-222, fog:0x0b2136, density:0.0190, sky:0x123048, ground:0x050f1c, sun:0.24, floor:0x4a4f5c},
+  {id:'abyss',  idx:4, name:'The Abyss',      sub:'SOMETHING WATCHES',yHigh:-222, yLow:-284, fog:0x050912, density:0.0290, sky:0x0a0e1c, ground:0x020308, sun:0.07, floor:0x1c1e2c},
+];
+const ZONES={}; ZONE_LIST.forEach(z=>ZONES[z.id]=z);
+function zoneForY(y){
+  for(let i=0;i<ZONE_LIST.length;i++){ const z=ZONE_LIST[i]; if(y<=z.yHigh && y>ZONE_LIST[i].yLow) return z; }
+  return y>ZONE_LIST[0].yHigh ? ZONE_LIST[0] : ZONE_LIST[ZONE_LIST.length-1];
+}
+
+/* ============================== CONFIG: CREATURES ============================== */
+const CREATURE_DEFS=[
+  {id:'glimmerfish', name:'Glimmer Fish',    tier:1, zones:['flats','kelp'],        behavior:'school', shape:'fish',  color:0x8fe9e0, accent:0xffffff, len:1.1, rad:0.34, speed:6.2, cap:24, schoolSize:8, xp:4,  coin:1},
+  {id:'pearlshrimp', name:'Pearl Shrimp',    tier:1, zones:['flats'],               behavior:'wander', shape:'fish',  color:0xffc7dd, accent:0xffffff, len:0.62,rad:0.22, speed:4.2, cap:10, xp:3,  coin:1},
+  {id:'moonjelly',   name:'Moon Jelly',      tier:1, zones:['flats','kelp'],        behavior:'wander', shape:'jelly', color:0xcfe9ff, accent:0xaad6ff, len:0.9, rad:0.5,  speed:1.5, cap:9,  xp:5,  coin:2, alpha:0.55},
+  {id:'bandedsnapper',name:'Banded Snapper', tier:2, zones:['kelp','ruins'],        behavior:'school', shape:'fish',  color:0xffb24d, accent:0x2a2a2a, len:1.8, rad:0.55, speed:7.0, cap:20, schoolSize:7, xp:12, coin:3},
+  {id:'reefsquid',   name:'Reef Squid',      tier:2, zones:['kelp'],                behavior:'wander', shape:'squid', color:0xb98bd6, accent:0x7a5a96, len:1.6, rad:0.42, speed:8.2, cap:8,  xp:14, coin:4},
+  {id:'sandycrab',   name:'Sandy Crab',      tier:2, zones:['flats','ruins'],       behavior:'floor',  shape:'crab',  color:0xd9713c, accent:0xb85128, len:1.0, rad:0.55, speed:2.6, cap:8,  xp:10, coin:3},
+  {id:'longfinray',  name:'Longfin Ray',     tier:3, zones:['ruins','trench'],      behavior:'wander', shape:'ray',   color:0x6f8fae, accent:0x466178, len:2.6, rad:1.05, speed:6.4, cap:8,  xp:26, coin:7},
+  {id:'ridgeturtle', name:'Ridgeback Turtle',tier:3, zones:['ruins'],               behavior:'wander', shape:'turtle',color:0x5a8f5c, accent:0x3a6a3d, len:1.9, rad:0.86, speed:3.2, cap:6,  xp:24, coin:6},
+  {id:'barrelgrouper',name:'Barrel Grouper', tier:3, zones:['ruins','trench'],      behavior:'wander', shape:'fish',  color:0x9a6a4a, accent:0x5f4028, len:2.4, rad:0.86, speed:5.0, cap:8,  xp:28, coin:8},
+  {id:'voltfineel',  name:'Voltfin Eel',     tier:4, zones:['trench'],              behavior:'patrol', shape:'eel',   color:0x8fffa8, accent:0x2fff6a, len:3.6, rad:0.42, speed:8.6, cap:5,  xp:55, coin:16, hp:70,  dmg:14, aggro:38, atkRange:3.0, atkCd:1.6},
+  {id:'razorbarracuda',name:'Razorjaw Barracuda',tier:4, zones:['trench','ruins'],  behavior:'patrol', shape:'fish',  color:0x8090a0, accent:0xdadfe4, len:3.0, rad:0.52, speed:11.0,cap:5,  xp:50, coin:15, hp:60,  dmg:16, aggro:42, atkRange:3.0, atkCd:1.4},
+  {id:'ironshellbeast',name:'Ironshell Beast',tier:4, zones:['trench'],             behavior:'patrol', shape:'beast', color:0x4a5560, accent:0x2e3640, len:3.2, rad:1.25, speed:4.4, cap:4,  xp:60, coin:18, hp:110, dmg:22, aggro:34, atkRange:3.4, atkCd:2.0},
+  {id:'duskfanghunter',name:'Duskfang Hunter',tier:5, zones:['abyss'],              behavior:'patrol', shape:'shark', color:0x2a2f45, accent:0x8899ff, len:4.4, rad:1.05, speed:10.2,cap:4,  xp:110,coin:34, hp:170, dmg:30, aggro:50, atkRange:3.6, atkCd:1.5},
+];
+const BOSS_DEF={id:'abyssalmaw', name:'The Abyssal Maw', tier:6, shape:'boss', color:0x1a1420, accent:0xff5c5c, len:9.5, rad:2.1, speed:9.5, hp:1100, dmg:36, xp:900, coin:260};
+
+/* ============================== CONFIG: MISSIONS ============================== */
+const MISSION_POOL=[
+  {key:'eat_t1', once:false, target:15, type:'eatTier', tier:1, reward:35, text:n=>`Eat ${Math.min(n,15)}/15 small fish`},
+  {key:'eat_t2', once:false, target:8,  type:'eatTier', tier:2, reward:60, text:n=>`Eat ${Math.min(n,8)}/8 mid-size prey`},
+  {key:'eat_t3', once:false, target:5,  type:'eatTier', tier:3, reward:100,text:n=>`Eat ${Math.min(n,5)}/5 large prey`},
+  {key:'treasure',once:false, target:3, type:'treasure', reward:90, text:n=>`Open ${Math.min(n,3)}/3 treasure chests`},
+  {key:'defeat_pred',once:false, target:1, type:'defeatPred', reward:140, text:()=>`Defeat a predator`},
+  {key:'survive',once:false, target:240, type:'survive', reward:110, text:n=>`Survive ${Math.min(Math.floor(n),240)}/240s this dive`},
+  {key:'reach_kelp', once:true, target:1, type:'zone', zone:'kelp', reward:30, text:()=>`Reach the Kelp Forest`},
+  {key:'reach_ruins',once:true, target:1, type:'zone', zone:'ruins', reward:55, text:()=>`Reach the Sunken Ruins`},
+  {key:'reach_trench',once:true,target:1, type:'zone', zone:'trench', reward:85, text:()=>`Reach the Deep Trench`},
+  {key:'reach_abyss',once:true, target:1, type:'zone', zone:'abyss', reward:130, text:()=>`Reach the Abyss`},
+  {key:'defeat_boss',once:true, target:1, type:'boss', reward:500, text:()=>`Defeat the Abyssal Maw`},
+];
+
+/* ============================== CONFIG: UPGRADES ============================== */
+const UPGRADES=[
+  {id:'speed', name:'Fin Speed',     icon:'\u{1F3CA}', desc:'+8% swim speed / level',    max:5, baseCost:30, costMul:1.7,  effect:l=>1+0.08*l},
+  {id:'health',name:'Thick Hide',    icon:'\u2764\uFE0F', desc:'+12% max health / level',  max:5, baseCost:35, costMul:1.7,  effect:l=>1+0.12*l},
+  {id:'bite',  name:'Razor Bite',    icon:'\u{1F9B7}', desc:'+15% bite damage / level',  max:5, baseCost:40, costMul:1.75, effect:l=>1+0.15*l},
+  {id:'boost', name:'Riptide Burst', icon:'\u26A1',     desc:'+10% boost speed / level',  max:5, baseCost:35, costMul:1.7,  effect:l=>1+0.10*l},
+  {id:'growth',name:'Deep Instinct', icon:'\u2728',     desc:'+10% XP gained / level',    max:5, baseCost:45, costMul:1.8,  effect:l=>1+0.10*l},
+  {id:'energy',name:'Iron Lungs',    icon:'\u{1F50B}', desc:'+15% stamina & regen / level', max:5, baseCost:30, costMul:1.65, effect:l=>1+0.15*l},
+  {id:'magnet',name:'Pearl Magnet',  icon:'\u{1FA99}', desc:'+12% Pearls gained / level',max:5, baseCost:50, costMul:1.85, effect:l=>1+0.12*l},
+];
+function upgradeCost(def,curLevel){ return Math.round(def.baseCost*Math.pow(def.costMul,curLevel)); }
+function upMul(id){ const u=UPGRADES.find(x=>x.id===id); return u? u.effect(profile.upgrades[id]||0) : 1; }
+
+/* ============================== THREE.JS SETUP ============================== */
+let renderer, scene, camera, clock;
+const canvas = document.getElementById('c');
+
+function initThree(){
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(ZONES.flats.fog);
+  scene.fog = new THREE.FogExp2(ZONES.flats.fog, ZONES.flats.density);
+
+  camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.4, 900);
+  camera.position.set(0, -18, 10);
+
+  hemi = new THREE.HemisphereLight(ZONES.flats.sky, ZONES.flats.ground, 0.9);
+  scene.add(hemi);
+  sun = new THREE.DirectionalLight(0xffffff, ZONES.flats.sun);
+  sun.position.set(40, 80, 20);
+  scene.add(sun);
+
+  clock = new THREE.Clock();
+
+  window.addEventListener('resize', onResize);
+  onResize();
+}
+let hemi, sun;
+function onResize(){
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/* ============================== SHARED MATERIAL / GEOMETRY CACHES ============================== */
+const matCache=new Map();
+function getMat(color, opts){
+  opts = opts||{};
+  const key = color+'|'+(opts.opacity!==undefined?opts.opacity:1)+'|'+(opts.emissive||0)+'|'+(opts.basic?1:0);
+  if(matCache.has(key)) return matCache.get(key);
+  let m;
+  if(opts.basic){
+    m = new THREE.MeshBasicMaterial({color, transparent:opts.opacity!==undefined, opacity:opts.opacity!==undefined?opts.opacity:1});
+  } else {
+    m = new THREE.MeshPhongMaterial({color, shininess:24, transparent:opts.opacity!==undefined, opacity:opts.opacity!==undefined?opts.opacity:1});
+    if(opts.emissive){ m.emissive = new THREE.Color(opts.emissive); m.emissiveIntensity = opts.emissiveIntensity||0.6; }
+  }
+  matCache.set(key,m);
+  return m;
+}
+const geomCache=new Map();
+function getGeom(key, builder){
+  if(geomCache.has(key)) return geomCache.get(key);
+  const g = builder();
+  geomCache.set(key,g);
+  return g;
+}
+const EYE_MAT = getMat(0x14181c,{basic:true});
+const TOOTH_MAT = getMat(0xf5f6f2,{basic:true});
+
+/* ============================== CREATURE / PLAYER MESH BUILDER ============================== */
+// Builds a reusable "part template" array {geometry, material, pos, rot, scale, tag} for a def.
+// Geometries & materials are cached/shared per def so many instances stay cheap (standard
+// Mesh-instancing pattern; avoids per-creature geometry allocation).
+function buildParts(def){
+  const parts=[];
+  const L=def.len, R=def.rad;
+  const bodyMat = getMat(def.color, def.alpha!==undefined?{opacity:def.alpha}:null);
+  const accentMat = getMat(def.accent!==undefined?def.accent:def.color);
+  const gKey = def.id+'_';
+
+  function push(geometry, material, x,y,z, rx,ry,rz, sx,sy,sz){
+    parts.push({geometry, material, pos:new THREE.Vector3(x||0,y||0,z||0),
+      rot:(rx||ry||rz)?new THREE.Euler(rx||0,ry||0,rz||0):null,
+      scale:(sx||sy||sz)?new THREE.Vector3(sx||1,sy||1,sz||1):null});
+  }
+
+  switch(def.shape){
+    case 'fish': {
+      const body = getGeom(gKey+'body', ()=>new THREE.SphereGeometry(R,10,8));
+      push(body, bodyMat, 0,0,0, 0,0,0, 1,0.82,L/ R*0.52);
+      const tail = getGeom(gKey+'tail', ()=>new THREE.ConeGeometry(R*0.95, L*0.62, 6));
+      push(tail, accentMat, 0,0, L*0.5, Math.PI/2,0,0);
+      const dorsal = getGeom(gKey+'dorsal', ()=>new THREE.ConeGeometry(R*0.42, R*1.15, 4));
+      push(dorsal, accentMat, 0,R*0.82,-L*0.02, Math.PI,0,0);
+      const finGeo = getGeom(gKey+'pfin', ()=>new THREE.ConeGeometry(R*0.3, R*0.9, 4));
+      push(finGeo, accentMat, R*0.7,-R*0.1,-L*0.15, 0,0,Math.PI/2.2);
+      push(finGeo, accentMat, -R*0.7,-R*0.1,-L*0.15, 0,0,-Math.PI/2.2);
+      const eyeGeo = getGeom('eye_'+R.toFixed(2), ()=>new THREE.SphereGeometry(Math.max(0.05,R*0.16),6,6));
+      push(eyeGeo, EYE_MAT, R*0.62, R*0.12, -L*0.32);
+      push(eyeGeo, EYE_MAT, -R*0.62, R*0.12, -L*0.32);
+      break;
+    }
+    case 'shark': {
+      const body = getGeom(gKey+'body', ()=>new THREE.SphereGeometry(R,12,10));
+      push(body, bodyMat, 0,0,0, 0,0,0, 0.86,0.78, L/R*0.5);
+      const snout = getGeom(gKey+'snout', ()=>new THREE.ConeGeometry(R*0.62, L*0.32, 8));
+      push(snout, bodyMat, 0,-R*0.05,-L*0.46, -Math.PI/2,0,0);
+      const tail = getGeom(gKey+'tail', ()=>new THREE.ConeGeometry(R*1.0, L*0.5, 6));
+      push(tail, accentMat, 0,R*0.05, L*0.48, Math.PI/2,0,0);
+      const dorsal = getGeom(gKey+'dorsal', ()=>new THREE.ConeGeometry(R*0.5, R*1.5, 4));
+      push(dorsal, bodyMat, 0,R*0.86,-L*0.02, Math.PI,0,0);
+      const finGeo = getGeom(gKey+'pfin', ()=>new THREE.ConeGeometry(R*0.36, R*1.1, 4));
+      push(finGeo, bodyMat, R*0.78,-R*0.15,-L*0.12, 0,0,Math.PI/2.1);
+      push(finGeo, bodyMat, -R*0.78,-R*0.15,-L*0.12, 0,0,-Math.PI/2.1);
+      const stripeGeo = getGeom(gKey+'stripe', ()=>new THREE.BoxGeometry(0.03, R*0.28, L*0.66));
+      push(stripeGeo, getMat(def.accent!==undefined?def.accent:0x4defd8,{basic:true,opacity:0.85}), R*0.86,0,-L*0.02);
+      push(stripeGeo, getMat(def.accent!==undefined?def.accent:0x4defd8,{basic:true,opacity:0.85}), -R*0.86,0,-L*0.02);
+      const eyeGeo = getGeom('eye_'+R.toFixed(2), ()=>new THREE.SphereGeometry(Math.max(0.06,R*0.13),6,6));
+      push(eyeGeo, EYE_MAT, R*0.5, R*0.08, -L*0.38);
+      push(eyeGeo, EYE_MAT, -R*0.5, R*0.08, -L*0.38);
+      const toothGeo = getGeom(gKey+'tooth', ()=>new THREE.ConeGeometry(R*0.09, R*0.3, 4));
+      for(let i=-2;i<=2;i++){ push(toothGeo, TOOTH_MAT, i*R*0.18, -R*0.32, -L*0.55, Math.PI,0,0); }
+      break;
+    }
+    case 'eel': {
+      const segCount=7;
+      const segGeo = getGeom(gKey+'seg', ()=>new THREE.SphereGeometry(R,8,7));
+      for(let i=0;i<segCount;i++){
+        const t=i/(segCount-1);
+        const s = 1 - Math.pow(t,1.4)*0.75;
+        push(segGeo, bodyMat, 0,0, -L*0.5 + t*L, 0,0,0, s,s*0.85,s*1.1);
+      }
+      const head = getGeom(gKey+'head', ()=>new THREE.ConeGeometry(R*0.9, R*1.6, 7));
+      push(head, bodyMat, 0,0,-L*0.56, -Math.PI/2,0,0);
+      const finGeo = getGeom(gKey+'fin', ()=>new THREE.ConeGeometry(R*0.5, L*0.9, 4));
+      push(finGeo, accentMat, 0, R*0.35, L*0.02, Math.PI,0,0, 0.18,1,1);
+      const eyeGeo = getGeom('eye_'+R.toFixed(2), ()=>new THREE.SphereGeometry(Math.max(0.05,R*0.22),6,6));
+      push(eyeGeo, getMat(def.accent, {basic:true, emissive:def.accent}), R*0.45,R*0.15,-L*0.5);
+      push(eyeGeo, getMat(def.accent, {basic:true, emissive:def.accent}), -R*0.45,R*0.15,-L*0.5);
+      break;
+    }
+    case 'ray': {
+      const body = getGeom(gKey+'body', ()=>new THREE.SphereGeometry(R,10,6));
+      push(body, bodyMat, 0,0,0, 0,0,0, 1.0,0.28,0.8);
+      const wingGeo = getGeom(gKey+'wing', ()=>new THREE.ConeGeometry(R*1.3, L*0.62, 3));
+      push(wingGeo, bodyMat, R*0.95,0,0, 0,0,-Math.PI/2, 1,1,0.62);
+      push(wingGeo, bodyMat, -R*0.95,0,0, 0,0,Math.PI/2, 1,1,0.62);
+      const tailGeo = getGeom(gKey+'raytail', ()=>new THREE.CylinderGeometry(R*0.06,R*0.02,L*0.9,5));
+      push(tailGeo, accentMat, 0,0,L*0.75, Math.PI/2,0,0);
+      const eyeGeo = getGeom('eye_'+R.toFixed(2), ()=>new THREE.SphereGeometry(Math.max(0.05,R*0.12),6,6));
+      push(eyeGeo, EYE_MAT, R*0.3, R*0.22, -L*0.28);
+      push(eyeGeo, EYE_MAT, -R*0.3, R*0.22, -L*0.28);
+      break;
+    }
+    case 'turtle': {
+      const shell = getGeom(gKey+'shell', ()=>new THREE.SphereGeometry(R,10,8,0,Math.PI*2,0,Math.PI/1.7));
+      push(shell, bodyMat, 0,R*0.1,0, Math.PI,0,0, 1,0.72,1.15);
+      const head = getGeom(gKey+'thead', ()=>new THREE.SphereGeometry(R*0.34,7,6));
+      push(head, accentMat, 0,-R*0.05,-L*0.42);
+      const flipGeo = getGeom(gKey+'flip', ()=>new THREE.ConeGeometry(R*0.3,R*0.9,4));
+      push(flipGeo, accentMat, R*0.75,-R*0.1,-L*0.1, 0,0,Math.PI/2.4);
+      push(flipGeo, accentMat, -R*0.75,-R*0.1,-L*0.1, 0,0,-Math.PI/2.4);
+      push(flipGeo, accentMat, R*0.6,-R*0.1,L*0.32, 0,0,Math.PI/2.1);
+      push(flipGeo, accentMat, -R*0.6,-R*0.1,L*0.32, 0,0,-Math.PI/2.1);
+      break;
+    }
+    case 'crab': {
+      const shellGeo = getGeom(gKey+'cshell', ()=>new THREE.BoxGeometry(R*1.7, R*0.6, L*0.7));
+      push(shellGeo, bodyMat, 0,0,0);
+      const legGeo = getGeom(gKey+'leg', ()=>new THREE.CylinderGeometry(R*0.05,R*0.05,R*0.9,4));
+      for(let i=-1;i<=1;i+=2){ for(let j=0;j<3;j++){
+        push(legGeo, accentMat, i*R*1.0, -R*0.3, (j-1)*R*0.5, 0,0,i*0.7);
+      } }
+      const clawGeo = getGeom(gKey+'claw', ()=>new THREE.ConeGeometry(R*0.32,R*0.6,5));
+      push(clawGeo, accentMat, R*0.9,0.02,-L*0.4, Math.PI/2,0,0);
+      push(clawGeo, accentMat, -R*0.9,0.02,-L*0.4, Math.PI/2,0,0);
+      const eyeGeo = getGeom('eye_'+R.toFixed(2), ()=>new THREE.SphereGeometry(Math.max(0.04,R*0.14),6,6));
+      push(eyeGeo, EYE_MAT, R*0.3, R*0.5, -L*0.32);
+      push(eyeGeo, EYE_MAT, -R*0.3, R*0.5, -L*0.32);
+      break;
+    }
+    case 'jelly': {
+      const domeGeo = getGeom(gKey+'dome', ()=>new THREE.SphereGeometry(R,10,8,0,Math.PI*2,0,Math.PI/1.9));
+      push(domeGeo, bodyMat, 0,R*0.2,0);
+      const tentGeo = getGeom(gKey+'tent', ()=>new THREE.CylinderGeometry(R*0.05,R*0.02,R*1.8,4));
+      for(let i=0;i<5;i++){
+        const a=(i/5)*Math.PI*2;
+        push(tentGeo, accentMat, Math.cos(a)*R*0.5, -R*0.9, Math.sin(a)*R*0.5, 0.15*Math.sin(a),0,0.15*Math.cos(a));
+      }
+      break;
+    }
+    case 'squid': {
+      const bodyGeo = getGeom(gKey+'sqbody', ()=>new THREE.ConeGeometry(R,L*0.75,8));
+      push(bodyGeo, bodyMat, 0,0,-L*0.1, -Math.PI/2,0,0);
+      const finGeo = getGeom(gKey+'sqfin', ()=>new THREE.ConeGeometry(R*0.5,R*0.7,4));
+      push(finGeo, accentMat, R*0.5,0,-L*0.35, 0,0,Math.PI/2);
+      push(finGeo, accentMat, -R*0.5,0,-L*0.35, 0,0,-Math.PI/2);
+      const tentGeo = getGeom(gKey+'sqtent', ()=>new THREE.CylinderGeometry(R*0.06,R*0.02,L*0.55,4));
+      for(let i=0;i<4;i++){
+        const a=(i/4)*Math.PI*2;
+        push(tentGeo, accentMat, Math.cos(a)*R*0.3, Math.sin(a)*R*0.3, L*0.5, 0.25,0,0);
+      }
+      break;
+    }
+    case 'beast': {
+      const bodyGeo = getGeom(gKey+'beastbody', ()=>new THREE.IcosahedronGeometry(R,1));
+      push(bodyGeo, bodyMat, 0,0,0, 0,0,0, 1,0.8,L/R*0.5);
+      const plateGeo = getGeom(gKey+'plate', ()=>new THREE.TetrahedronGeometry(R*0.4,0));
+      for(let i=0;i<5;i++){ push(plateGeo, accentMat, rand(-R*0.5,R*0.5), R*0.7, -L*0.3+i*L*0.15, 0,rand(0,Math.PI),0); }
+      const hornGeo = getGeom(gKey+'horn', ()=>new THREE.ConeGeometry(R*0.28,R*0.9,5));
+      push(hornGeo, accentMat, R*0.45,R*0.25,-L*0.42, -Math.PI/2.3,0,0.3);
+      push(hornGeo, accentMat, -R*0.45,R*0.25,-L*0.42, -Math.PI/2.3,0,-0.3);
+      const eyeGeo = getGeom('eye_'+R.toFixed(2), ()=>new THREE.SphereGeometry(Math.max(0.06,R*0.13),6,6));
+      push(eyeGeo, getMat(0xff5c5c,{basic:true,emissive:0xff5c5c}), R*0.4,R*0.05,-L*0.4);
+      push(eyeGeo, getMat(0xff5c5c,{basic:true,emissive:0xff5c5c}), -R*0.4,R*0.05,-L*0.4);
+      break;
+    }
+    case 'boss': {
+      const body = getGeom(gKey+'body', ()=>new THREE.SphereGeometry(R,14,12));
+      push(body, bodyMat, 0,0,0, 0,0,0, 0.9,0.8, L/R*0.5);
+      const snout = getGeom(gKey+'snout', ()=>new THREE.ConeGeometry(R*0.7, L*0.34, 9));
+      push(snout, bodyMat, 0,-R*0.08,-L*0.46, -Math.PI/2,0,0);
+      const tail = getGeom(gKey+'tail', ()=>new THREE.ConeGeometry(R*1.1, L*0.5, 7));
+      push(tail, accentMat, 0,R*0.05, L*0.48, Math.PI/2,0,0);
+      const dorsal = getGeom(gKey+'dorsal', ()=>new THREE.ConeGeometry(R*0.6, R*1.9, 5));
+      push(dorsal, bodyMat, 0,R*0.95,-L*0.05, Math.PI,0,0);
+      const spikeGeo = getGeom(gKey+'spike', ()=>new THREE.ConeGeometry(R*0.22,R*0.7,4));
+      for(let i=0;i<6;i++){ push(spikeGeo, accentMat, 0, R*0.75, -L*0.3+i*L*0.11, Math.PI,0,0); }
+      const finGeo = getGeom(gKey+'pfin', ()=>new THREE.ConeGeometry(R*0.5, R*1.6, 4));
+      push(finGeo, bodyMat, R*0.9,-R*0.2,-L*0.05, 0,0,Math.PI/2.1);
+      push(finGeo, bodyMat, -R*0.9,-R*0.2,-L*0.05, 0,0,-Math.PI/2.1);
+      const eyeGeo = getGeom(gKey+'eye', ()=>new THREE.SphereGeometry(R*0.16,8,8));
+      push(eyeGeo, getMat(0xff5c5c,{basic:true,emissive:0xff5c5c}), R*0.55, R*0.1, -L*0.38);
+      push(eyeGeo, getMat(0xff5c5c,{basic:true,emissive:0xff5c5c}), -R*0.55, R*0.1, -L*0.38);
+      const toothGeo = getGeom(gKey+'tooth', ()=>new THREE.ConeGeometry(R*0.13, R*0.5, 4));
+      for(let i=-3;i<=3;i++){ push(toothGeo, TOOTH_MAT, i*R*0.16, -R*0.36, -L*0.55, Math.PI,0,0); }
+      break;
+    }
+  }
+  return parts;
+}
+function buildCreatureMesh(def){
+  if(!def._parts) def._parts = buildParts(def);
+  const g = new THREE.Group();
+  def._parts.forEach(p=>{
+    const m = new THREE.Mesh(p.geometry, p.material);
+    m.position.copy(p.pos);
+    if(p.rot) m.rotation.copy(p.rot);
+    if(p.scale) m.scale.copy(p.scale);
+    g.add(m);
+  });
+  g.userData.segMeshes = def.shape==='eel' ? g.children.slice(0,7) : null;
+  return g;
+}
+
+/* ============================== WORLD DECOR ============================== */
+const BOUND_R = 260, Y_TOP=-2, Y_BOTTOM=-282;
+let kelpFronds=[], bubbles=[], sunRayMeshes=[], treasures=[];
+
+function buildWorld(){
+  buildFloor();
+  scatterCoral(42);
+  scatterKelp(46);
+  scatterRocks(34);
+  buildShipwreck();
+  scatterTreasure(14);
+  buildSunRays();
+  buildBubbles(28);
+  buildBoundaryMarkers();
+}
+
+function buildFloor(){
+  const geo = new THREE.PlaneGeometry(620,620,40,40);
+  const pos = geo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), y=pos.getY(i);
+    const h = Math.sin(x*0.02)*3 + Math.cos(y*0.017)*3 + Math.sin((x+y)*0.01)*2;
+    pos.setZ(i, h);
+  }
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshPhongMaterial({color:0x2a2f3a, shininess:8});
+  const floor = new THREE.Mesh(geo, mat);
+  floor.rotation.x = -Math.PI/2;
+  floor.position.y = Y_BOTTOM;
+  scene.add(floor);
+  floorMesh = floor;
+}
+let floorMesh;
+
+function ringPos(rMin,rMax){
+  const a = rand(0,Math.PI*2), r = rand(rMin,rMax);
+  return [Math.cos(a)*r, Math.sin(a)*r];
+}
+
+function scatterCoral(count){
+  const palette=[0xff6f91,0xffb347,0x9d6dff,0xff8fa3,0x5ad1c9];
+  for(let i=0;i<count;i++){
+    const [x,z] = ringPos(10,230);
+    const y = rand(ZONES.flats.yLow+2, ZONES.flats.yHigh-6);
+    const grp = new THREE.Group();
+    const clusterN = randInt(2,4);
+    for(let k=0;k<clusterN;k++){
+      const c = choice(palette);
+      const mat = getMat(c);
+      const shape = choice(['cone','sphere','torus']);
+      let m;
+      if(shape==='cone') m = new THREE.Mesh(getGeom('coral_cone', ()=>new THREE.ConeGeometry(0.5,1.6,6)), mat);
+      else if(shape==='sphere') m = new THREE.Mesh(getGeom('coral_sphere', ()=>new THREE.SphereGeometry(0.55,7,6)), mat);
+      else m = new THREE.Mesh(getGeom('coral_torus', ()=>new THREE.TorusGeometry(0.5,0.16,6,10)), mat);
+      m.position.set(rand(-1,1),rand(0,1),rand(-1,1));
+      m.scale.setScalar(rand(0.6,1.5));
+      m.rotation.set(rand(0,Math.PI),rand(0,Math.PI),0);
+      grp.add(m);
+    }
+    grp.position.set(x,y,z);
+    scene.add(grp);
+  }
+}
+
+function scatterKelp(count){
+  const mat = getMat(0x1f7a52);
+  for(let i=0;i<count;i++){
+    const [x,z] = ringPos(15,235);
+    const baseY = rand(ZONES.kelp.yLow+2, ZONES.kelp.yHigh);
+    const h = rand(14,30);
+    const strand = new THREE.Group();
+    let segY=0;
+    const segN=4;
+    for(let s=0;s<segN;s++){
+      const segH = h/segN;
+      const geo = getGeom('kelpseg', ()=>new THREE.CylinderGeometry(0.14,0.2,1,5));
+      const m = new THREE.Mesh(geo, mat);
+      m.scale.y = segH;
+      m.position.y = segY + segH/2;
+      strand.add(m);
+      segY += segH;
+    }
+    strand.position.set(x, baseY, z);
+    strand.userData.sway = rand(0,Math.PI*2);
+    scene.add(strand);
+    kelpFronds.push(strand);
+  }
+}
+
+function scatterRocks(count){
+  const mat = getMat(0x4a5866);
+  for(let i=0;i<count;i++){
+    const [x,z] = ringPos(10,245);
+    const zone = zoneForY(-rand(6,270));
+    const y = rand(zone.yLow+2, Math.min(zone.yHigh-2, zone.yLow+16));
+    const geo = getGeom('rock', ()=>new THREE.IcosahedronGeometry(1,0));
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x,y,z);
+    m.scale.set(rand(1,3.4),rand(0.7,2),rand(1,3.4));
+    m.rotation.set(rand(0,Math.PI),rand(0,Math.PI),rand(0,Math.PI));
+    scene.add(m);
+  }
+}
+
+function buildShipwreck(){
+  const grp = new THREE.Group();
+  const hullMat = getMat(0x5c4530);
+  const hull = new THREE.Mesh(new THREE.CylinderGeometry(3.2,4.2,18,8,1,true), hullMat);
+  hull.rotation.z = Math.PI/2.3;
+  hull.rotation.x = 0.15;
+  grp.add(hull);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(16,0.6,5), getMat(0x3d2e1e));
+  deck.rotation.z = 0.35;
+  deck.position.set(0,2.2,0);
+  grp.add(deck);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.35,14,6), getMat(0x2e2115));
+  mast.position.set(-2,7,0.5);
+  mast.rotation.z = 0.5;
+  grp.add(mast);
+  grp.position.set(30, ZONES.ruins.yLow+9, -60);
+  grp.rotation.y = 0.6;
+  scene.add(grp);
+  shipwreckPos = grp.position.clone();
+}
+let shipwreckPos=new THREE.Vector3();
+
+function scatterTreasure(count){
+  for(let i=0;i<count;i++){
+    treasures.push(makeTreasure());
+  }
+}
+function makeTreasure(){
+  const grp = new THREE.Group();
+  const base = new THREE.Mesh(getGeom('chestbase',()=>new THREE.BoxGeometry(1.2,0.7,0.8)), getMat(0x8a5a2e));
+  const lid = new THREE.Mesh(getGeom('chestlid',()=>new THREE.BoxGeometry(1.24,0.35,0.84)), getMat(0x6f4522));
+  lid.position.set(0,0.5,-0.15); lid.rotation.x = -0.5;
+  const pearl = new THREE.Mesh(getGeom('chestpearl',()=>new THREE.IcosahedronGeometry(0.26,1)), getMat(0xffd37a,{basic:true,emissive:0xffd37a}));
+  pearl.position.set(0,0.7,0.05);
+  grp.add(base,lid,pearl);
+  respawnTreasure(grp);
+  scene.add(grp);
+  grp.userData.pearl = pearl;
+  return grp;
+}
+function respawnTreasure(grp){
+  const zoneChoices = ['flats','kelp','ruins','trench'];
+  const zid = choice(zoneChoices.filter(z=> ZONES[z].idx <= (unlockedZoneIdx+1) ));
+  const zone = ZONES[zid]||ZONES.flats;
+  const [x,z] = ringPos(10,230);
+  grp.position.set(x, rand(zone.yLow+3, zone.yHigh-3), z);
+  grp.visible = true;
+  grp.userData.collected = false;
+}
+
+function buildSunRays(){
+  const mat = new THREE.MeshBasicMaterial({color:0xdff8ff, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false});
+  for(let i=0;i<6;i++){
+    const geo = new THREE.ConeGeometry(rand(10,18), 90, 5, 1, true);
+    const m = new THREE.Mesh(geo, mat.clone());
+    m.position.set(rand(-120,120), 20, rand(-120,120));
+    m.rotation.x = Math.PI;
+    m.rotation.z = rand(-0.3,0.3);
+    scene.add(m);
+    sunRayMeshes.push(m);
+  }
+}
+
+function buildBubbles(count){
+  const geo = getGeom('bubble', ()=>new THREE.SphereGeometry(0.12,6,6));
+  const mat = new THREE.MeshBasicMaterial({color:0xdfffff, transparent:true, opacity:0.35});
+  for(let i=0;i<count;i++){
+    const m = new THREE.Mesh(geo, mat);
+    resetBubble(m,true);
+    scene.add(m);
+    bubbles.push(m);
+  }
+}
+function resetBubble(m, initial){
+  const px = player? player.pos.x : 0, pz = player? player.pos.z : 0, py = player? player.pos.y : -20;
+  m.position.set(px+rand(-40,40), initial? rand(Y_BOTTOM,Y_TOP) : py+rand(-14,-2), pz+rand(-40,40));
+  m.userData.speed = rand(2.4,4.8);
+  m.userData.drift = rand(0,Math.PI*2);
+  m.scale.setScalar(rand(0.5,1.6));
+}
+
+function buildBoundaryMarkers(){
+  // subtle glowing ring far out to hint the swim boundary without a hard wall
+  const geo = new THREE.TorusGeometry(BOUND_R, 1.2, 6, 48);
+  const mat = new THREE.MeshBasicMaterial({color:0x4defd8, transparent:true, opacity:0.05});
+  const ring = new THREE.Mesh(geo, mat);
+  ring.rotation.x = Math.PI/2;
+  ring.position.y = -140;
+  scene.add(ring);
+}
+
+/* ============================== ZONE VISUAL TRANSITION ============================== */
+let curFogColor = new THREE.Color(ZONES.flats.fog);
+let curDensity = ZONES.flats.density;
+let curSkyColor = new THREE.Color(ZONES.flats.sky);
+let curGroundColor = new THREE.Color(ZONES.flats.ground);
+let curSun = ZONES.flats.sun;
+let currentZone = ZONES.flats;
+let lastToastZone = null;
+function updateZoneVisuals(dt){
+  const z = zoneForY(player.pos.y);
+  if(z !== currentZone){
+    currentZone = z;
+    onZoneChanged(z);
+  }
+  const t = clamp(dt*0.8,0,1);
+  curFogColor.lerp(new THREE.Color(z.fog), t);
+  curDensity = lerp(curDensity, z.density, t);
+  curSkyColor.lerp(new THREE.Color(z.sky), t);
+  curGroundColor.lerp(new THREE.Color(z.ground), t);
+  curSun = lerp(curSun, z.sun, t);
+  scene.background.copy(curFogColor);
+  scene.fog.color.copy(curFogColor);
+  scene.fog.density = curDensity;
+  hemi.color.copy(curSkyColor);
+  hemi.groundColor.copy(curGroundColor);
+  sun.intensity = curSun;
+}
+function onZoneChanged(z){
+  zonePillEl.textContent = z.name;
+  showZoneToast(z);
+  if(z.idx > unlockedZoneIdx) unlockedZoneIdx = z.idx;
+  missionEvent('zone',{zone:z.id});
+  if(z.id==='abyss' && profile.level>=8){ bossAlertPending = true; }
+}
+let unlockedZoneIdx = 0;
+
+/* ============================== PLAYER ============================== */
+let player, playerGroup;
+let bossBarEl=null, bossHpFillEl=null;
+
+function initPlayer(){
+  player = {
+    pos: new THREE.Vector3(0, ZONES.flats.yHigh-8, 0),
+    yaw: 0, pitch: 0, roll: 0,
+    yawVel: 0,
+    forward: new THREE.Vector3(0,0,-1),
+    speed: 0,
+    boosting: false,
+    stamina: 100, maxStamina: 100,
+    health: 100, maxHealth: 100,
+    hunger: 100, maxHunger: 100,
+    invuln: 0, ramCD: 0,
+    runCoins: 0, runElapsed: 0,
+    biggestMealName: '\u2014', biggestMealTier: 0,
+    warnedLow: false,
+    dead: false,
+    bodyRadius: 1.1,
+  };
+  playerGroup = buildCreatureMesh(Object.assign({}, {id:'riptooth', shape:'shark', color:0x2fb8a6, accent:0x4defd8, len:3.4, rad:1.0}));
+  playerGroup.scale.setScalar(LEVELS[0].size);
+  scene.add(playerGroup);
+  computePlayerStats();
+}
+
+function computePlayerStats(){
+  const lv = LEVELS[profile.level-1];
+  const prevMaxHealth = player.maxHealth;
+  player.maxHealth = Math.round(lv.hp*upMul('health'));
+  player.baseSpeed = 8.6*lv.spd*upMul('speed');
+  player.boostMul = 1.55*upMul('boost');
+  player.biteDamage = lv.bite*upMul('bite');
+  player.maxStamina = 100*upMul('energy');
+  player.staminaRegen = 26*upMul('energy');
+  player.staminaDrain = 32;
+  player.xpMul = upMul('growth');
+  player.coinMul = upMul('magnet');
+  player.eatTier = lv.eatTier;
+  player.bodyRadius = 0.9*lv.size;
+  if(player.health===undefined || prevMaxHealth===undefined) player.health = player.maxHealth;
+}
+
+function applyUpgrades(){ computePlayerStats(); }
+
+const _fwd = new THREE.Vector3();
+const _tgt = new THREE.Vector3();
+function updatePlayer(dt){
+  if(player.dead) return;
+  const inX = input.x, inY = input.y;
+  const TURN_RATE = 1.55, MAX_PITCH = 0.85, MAX_ROLL = 0.62;
+
+  const yawTarget = inX * TURN_RATE;
+  player.yawVel = lerp(player.yawVel, yawTarget, clamp(dt*6,0,1));
+  player.yaw += player.yawVel*dt;
+
+  const pitchTarget = clamp(-inY,-1,1) * MAX_PITCH;
+  player.pitch = lerp(player.pitch, pitchTarget, clamp(dt*4,0,1));
+  player.roll = lerp(player.roll, -inX*MAX_ROLL, clamp(dt*5,0,1));
+
+  _fwd.set(Math.sin(player.yaw)*Math.cos(player.pitch), -Math.sin(player.pitch), Math.cos(player.yaw)*Math.cos(player.pitch));
+  player.forward.copy(_fwd);
+
+  const canBoost = player.boosting && player.stamina>2;
+  if(canBoost){ player.stamina = Math.max(0, player.stamina - player.staminaDrain*dt); }
+  else { player.stamina = Math.min(player.maxStamina, player.stamina + player.staminaRegen*dt); }
+  if(player.stamina<=0) player.boosting=false;
+
+  const targetSpeed = player.baseSpeed * (canBoost? player.boostMul : 1);
+  player.speed = lerp(player.speed, targetSpeed, clamp(dt*2.6,0,1));
+
+  player.pos.addScaledVector(_fwd, player.speed*dt);
+
+  // soft world boundary
+  const rXZ = Math.hypot(player.pos.x, player.pos.z);
+  if(rXZ > BOUND_R){
+    const pull = (rXZ-BOUND_R)*0.06;
+    player.pos.x -= (player.pos.x/rXZ)*pull;
+    player.pos.z -= (player.pos.z/rXZ)*pull;
+    if(!boundaryWarned){ boundaryWarned=true; toast('The open ocean turns you back \u2014 stay near the reef.'); }
+  }
+  player.pos.y = clamp(player.pos.y, Y_BOTTOM+4, Y_TOP);
+
+  playerGroup.position.copy(player.pos);
+  _tgt.copy(player.pos).add(_fwd);
+  playerGroup.up.set(0,1,0);
+  playerGroup.lookAt(_tgt);
+  playerGroup.rotateZ(player.roll);
+  playerGroup.scale.setScalar(LEVELS[profile.level-1].size);
+
+  // hunger & health drain
+  player.hunger = Math.max(0, player.hunger - 100/150*dt);
+  if(player.hunger<=0){ player.health -= 5*dt; }
+  if(player.invuln>0) player.invuln -= dt;
+  if(player.ramCD>0) player.ramCD -= dt;
+
+  if(player.health<=0){ onPlayerDeath(); return; }
+
+  if(player.health < player.maxHealth*0.25 && !player.warnedLow){
+    player.warnedLow=true;
+    toast('Health critical! Find food or flee.', 'warn');
+  } else if(player.health > player.maxHealth*0.45){
+    player.warnedLow=false;
+  }
+
+  player.runElapsed += dt;
+  missionEvent('survive', {value: player.runElapsed});
+
+  updateZoneVisuals(dt);
+}
+let boundaryWarned=false;
+
+function damagePlayer(amount){
+  if(player.invuln>0 || player.dead) return;
+  player.health -= amount;
+  player.invuln = 0.8;
+  vignetteEl.classList.add('hit');
+  setTimeout(()=>vignetteEl.classList.remove('hit'), 160);
+  SFX.damage();
+  shakeCamera(0.35, 0.5);
+  if(navigator.vibrate) navigator.vibrate(60);
+}
+
+function onPlayerDeath(){
+  if(player.dead) return;
+  player.dead = true;
+  running = false;
+  persistProfile();
+  const lv = LEVELS[profile.level-1];
+  document.getElementById('go-level').textContent = lv.n+' \u2014 '+lv.name;
+  document.getElementById('go-coins').textContent = player.runCoins;
+  document.getElementById('go-biggest').textContent = player.biggestMealName;
+  openModal('gameover-modal');
+}
+
+function respawnPlayer(){
+  player.dead=false;
+  player.health = player.maxHealth;
+  player.hunger = player.maxHunger;
+  player.stamina = player.maxStamina;
+  player.pos.set(rand(-20,20), ZONES.flats.yHigh-8, rand(-20,20));
+  player.runCoins = 0;
+  player.runElapsed = 0;
+  player.biggestMealName = '\u2014';
+  player.biggestMealTier = 0;
+  player.warnedLow = false;
+  boundaryWarned = false;
+  running = true;
+}
+
+/* ============================== INPUT ============================== */
+const input = {x:0, y:0};
+const joyBase = document.getElementById('joy-base');
+const joyNub = document.getElementById('joy-nub');
+const boostBtn = document.getElementById('boost-btn');
+let joyPointerId = null, boostPointerId = null;
+
+function initInput(){
+  const R = 46;
+  joyBase.addEventListener('pointerdown', e=>{
+    joyPointerId = e.pointerId;
+    joyBase.setPointerCapture(e.pointerId);
+    handleJoy(e);
+  });
+  joyBase.addEventListener('pointermove', e=>{ if(e.pointerId===joyPointerId) handleJoy(e); });
+  function endJoy(e){
+    if(e.pointerId!==joyPointerId) return;
+    joyPointerId=null; input.x=0; input.y=0;
+    joyNub.style.transform = 'translate(0px,0px)';
+  }
+  joyBase.addEventListener('pointerup', endJoy);
+  joyBase.addEventListener('pointercancel', endJoy);
+  joyBase.addEventListener('lostpointercapture', endJoy);
+
+  function handleJoy(e){
+    const rect = joyBase.getBoundingClientRect();
+    const cx = rect.left+rect.width/2, cy = rect.top+rect.height/2;
+    let dx = e.clientX-cx, dy = e.clientY-cy;
+    const d = Math.hypot(dx,dy);
+    if(d>R){ dx = dx/d*R; dy = dy/d*R; }
+    joyNub.style.transform = `translate(${dx}px,${dy}px)`;
+    input.x = clamp(dx/R,-1,1);
+    input.y = clamp(dy/R,-1,1);
+  }
+
+  boostBtn.addEventListener('pointerdown', e=>{
+    boostPointerId = e.pointerId;
+    boostBtn.setPointerCapture(e.pointerId);
+    player.boosting = true;
+    boostBtn.classList.add('active');
+    SFX.init(); SFX.resume(); SFX.boost();
+  });
+  function endBoost(e){
+    if(e.pointerId!==boostPointerId) return;
+    boostPointerId=null; player.boosting=false;
+    boostBtn.classList.remove('active');
+  }
+  boostBtn.addEventListener('pointerup', endBoost);
+  boostBtn.addEventListener('pointercancel', endBoost);
+  boostBtn.addEventListener('lostpointercapture', endBoost);
+
+  document.getElementById('controls').addEventListener('touchmove', e=>e.preventDefault(), {passive:false});
+  document.body.addEventListener('pointerdown', ()=>SFX.resume());
+}
+
+/* ============================== CREATURE AI / SPAWN SYSTEM ============================== */
+class Creature{
+  constructor(def){
+    this.def = def;
+    this.mesh = buildCreatureMesh(def);
+    scene.add(this.mesh);
+    this.pos = new THREE.Vector3();
+    this.vel = new THREE.Vector3(0,0,1);
+    this.home = new THREE.Vector3();
+    this.wanderTarget = new THREE.Vector3();
+    this.state = 'wander';
+    this.speedMul = 1;
+    this.attackCd = 0;
+    this.telegraph = 0;
+    this.hp = def.hp||0; this.maxHp = this.hp;
+    this.active = false;
+    this.floorY = 0;
+    this.bobPhase = rand(0,Math.PI*2);
+  }
+  reset(){
+    this.speedMul = rand(0.85,1.18);
+    this.attackCd = rand(0,0.6);
+    this.state = (this.def.behavior==='patrol')?'patrol':'wander';
+    this.hp = this.def.hp||0; this.maxHp = this.hp;
+    this.mesh.visible = true;
+    this.active = true;
+    this.telegraph = 0;
+  }
+}
+const pools = {};
+const activeList = [];
+const activeByDef = new Map();
+
+function acquireCreature(def){
+  const pool = pools[def.id] || (pools[def.id]=[]);
+  let c = pool.pop();
+  if(!c) c = new Creature(def);
+  c.reset();
+  activeList.push(c);
+  let arr = activeByDef.get(def.id); if(!arr){ arr=[]; activeByDef.set(def.id,arr); }
+  arr.push(c);
+  return c;
+}
+function releaseCreature(c){
+  c.mesh.visible=false;
+  c.active=false;
+  const i = activeList.indexOf(c); if(i>=0) activeList.splice(i,1);
+  const arr = activeByDef.get(c.def.id); if(arr){ const j=arr.indexOf(c); if(j>=0) arr.splice(j,1); }
+  (pools[c.def.id]).push(c);
+}
+
+function zoneYRange(zid, floorbound){
+  const z = ZONES[zid];
+  if(floorbound) return [z.yLow+2, z.yLow+8];
+  return [z.yLow+4, z.yHigh-4];
+}
+
+function spawnOne(def, nearZoneId){
+  const zid = def.zones.includes(nearZoneId) ? nearZoneId : def.zones[0];
+  const [yMin,yMax] = zoneYRange(zid, def.behavior==='floor');
+  const [ox,oz] = ringPos(55,155);
+  const c = acquireCreature(def);
+  c.pos.set(player.pos.x+ox, clamp(rand(yMin,yMax), Y_BOTTOM+3, Y_TOP-3), player.pos.z+oz);
+  c.home.copy(c.pos);
+  c.floorY = yMin;
+  c.mesh.position.copy(c.pos);
+  return c;
+}
+function spawnSchool(def, nearZoneId){
+  const zid = def.zones.includes(nearZoneId) ? nearZoneId : def.zones[0];
+  const [yMin,yMax] = zoneYRange(zid,false);
+  const [ox,oz] = ringPos(55,150);
+  const cx = player.pos.x+ox, cz = player.pos.z+oz, cy = clamp(rand(yMin,yMax), Y_BOTTOM+3, Y_TOP-3);
+  const n = def.schoolSize||6;
+  for(let i=0;i<n;i++){
+    const c = acquireCreature(def);
+    c.pos.set(cx+rand(-4,4), cy+rand(-2,2), cz+rand(-4,4));
+    c.home.set(cx,cy,cz);
+    c.mesh.position.copy(c.pos);
+  }
+}
+function schoolClusterEstimate(def){
+  const arr = activeByDef.get(def.id);
+  return arr ? Math.ceil(arr.length/(def.schoolSize||6)) : 0;
+}
+
+let spawnAccum=0;
+function spawnTick(dt){
+  spawnAccum += dt;
+  if(spawnAccum<0.5) return;
+  spawnAccum=0;
+  const curZone = zoneForY(player.pos.y);
+  const allowed = new Set([curZone.id]);
+  const a1 = ZONE_LIST[curZone.idx-1]; if(a1) allowed.add(a1.id);
+  const a2 = ZONE_LIST[curZone.idx+1]; if(a2) allowed.add(a2.id);
+  CREATURE_DEFS.forEach(def=>{
+    if(!def.zones.some(z=>allowed.has(z))) return;
+    const activeCount = (activeByDef.get(def.id)||[]).length;
+    if(def.behavior==='school'){
+      const clusters = Math.max(1,Math.floor((def.cap||10)/(def.schoolSize||6)));
+      if(schoolClusterEstimate(def)<clusters && Math.random()<0.7) spawnSchool(def, curZone.id);
+    } else {
+      if(activeCount < (def.cap||6) && Math.random()<0.55) spawnOne(def, curZone.id);
+    }
+  });
+  // despawn far
+  for(let i=activeList.length-1;i>=0;i--){
+    const c = activeList[i];
+    if(c===boss) continue;
+    if(c.pos.distanceTo(player.pos) > 300) releaseCreature(c);
+  }
+}
+
+/* ---- AI decision tick (throttled) + movement integration (every frame) ---- */
+const AI_INTERVAL = 1/14;
+let aiAccum = 0;
+const ACTIVE_RADIUS = 150;
+
+function updateCreatures(dt){
+  aiAccum += dt;
+  const runAI = aiAccum >= AI_INTERVAL;
+  if(runAI) aiAccum = 0;
+
+  for(let i=0;i<activeList.length;i++){
+    const c = activeList[i];
+    if(!c.active) continue;
+    const d = c.pos.distanceTo(player.pos);
+    const near = d < ACTIVE_RADIUS;
+
+    if(runAI && near) decideCreature(c, d);
+    integrateCreature(c, dt, near);
+  }
+  handleContacts();
+}
+
+function decideCreature(c, distToPlayer){
+  const def = c.def;
+  const tier = def.tier;
+  const isThreatToCreature = (player.eatTier >= tier); // player can eat/scares it
+  if(def.behavior==='school' || def.behavior==='wander' || def.behavior==='floor'){
+    if(isThreatToCreature && distToPlayer < 26){
+      c.state='flee';
+    } else if(c.state==='flee' && distToPlayer>32){
+      c.state='wander';
+    } else if(c.state!=='flee'){
+      c.state='wander';
+      if(c.wanderTarget.lengthSq()===0 || c.pos.distanceTo(c.wanderTarget)<3 || Math.random()<0.02){
+        pickWanderTarget(c);
+      }
+    }
+  } else if(def.behavior==='patrol'){
+    if(isThreatToCreature){
+      c.state = distToPlayer<30 ? 'flee' : 'patrol';
+    } else if(c.state==='patrol' || c.state==='wander'){
+      if(distToPlayer < (def.aggro||40)) c.state='hunt';
+      else { c.state='patrol'; if(c.wanderTarget.lengthSq()===0 || c.pos.distanceTo(c.wanderTarget)<3) pickWanderTarget(c,18); }
+    } else if(c.state==='hunt'){
+      if(distToPlayer > (def.aggro||40)*1.6) c.state='patrol';
+    }
+  }
+}
+function pickWanderTarget(c, radius){
+  radius = radius||22;
+  const zid = zoneForY(c.home.y).id;
+  const [yMin,yMax] = zoneYRange(zid, c.def.behavior==='floor');
+  c.wanderTarget.set(
+    c.home.x+rand(-radius,radius),
+    c.def.behavior==='floor'? c.floorY : clamp(c.home.y+rand(-radius*0.5,radius*0.5), yMin, yMax),
+    c.home.z+rand(-radius,radius)
+  );
+}
+
+const _cf = new THREE.Vector3();
+const _cofs = new THREE.Vector3();
+function integrateCreature(c, dt, near){
+  const def = c.def;
+  let desired = _cf.set(0,0,0);
+  if(c.state==='flee'){
+    desired.subVectors(c.pos, player.pos).normalize();
+    desired.y += 0.15;
+  } else if(c.state==='hunt'){
+    desired.subVectors(player.pos, c.pos).normalize();
+  } else {
+    desired.subVectors(c.wanderTarget, c.pos);
+    if(desired.lengthSq()<0.0001) desired.set(rand(-1,1),0,rand(-1,1));
+    desired.normalize();
+    if(def.behavior==='school' && near){
+      // mild cohesion with nearby same-def actives
+      const arr = activeByDef.get(def.id);
+      if(arr && arr.length>1){
+        _cofs.set(0,0,0); let cnt=0;
+        for(let k=0;k<arr.length;k++){ const o=arr[k]; if(o===c) continue; const dd=o.pos.distanceTo(c.pos); if(dd<9){ _cofs.add(o.pos); cnt++; } }
+        if(cnt>0){ _cofs.divideScalar(cnt).sub(c.pos).normalize(); desired.addScaledVector(_cofs,0.5).normalize(); }
+      }
+    }
+  }
+  const spd = def.speed*c.speedMul*(c.state==='hunt'||c.state==='flee'?1.25:1);
+  c.vel.lerp(desired.multiplyScalar(spd), clamp(dt*2.2,0,1));
+  c.pos.addScaledVector(c.vel, dt);
+
+  // stay in loose bounds
+  c.pos.y = clamp(c.pos.y, Y_BOTTOM+3, Y_TOP-3);
+  const rXZ = Math.hypot(c.pos.x,c.pos.z);
+  if(rXZ>BOUND_R+20){ c.pos.x*= (BOUND_R+15)/rXZ; c.pos.z*=(BOUND_R+15)/rXZ; }
+
+  c.mesh.position.copy(c.pos);
+  if(near && c.vel.lengthSq()>0.02){
+    _tgt.copy(c.pos).addScaledVector(c.vel,0.6).add(new THREE.Vector3(0,0,0.0001));
+    c.mesh.up.set(0,1,0);
+    c.mesh.lookAt(_tgt);
+  }
+  c.mesh.position.y += Math.sin(performance.now()*0.002 + c.bobPhase)*0.08;
+
+  if(near && def.shape==='eel' && c.mesh.userData.segMeshes){
+    const segs = c.mesh.userData.segMeshes;
+    const t = performance.now()*0.006;
+    for(let i=0;i<segs.length;i++){ segs[i].position.x = Math.sin(t + i*0.8)*0.28*(i/segs.length); }
+  }
+  if(near && (def.behavior==='patrol')) c.attackCd -= dt;
+}
+
+/* ---- contact resolution: eat / ram / damage ---- */
+function handleContacts(){
+  for(let i=0;i<activeList.length;i++){
+    const c = activeList[i];
+    if(!c.active) continue;
+    const d = c.pos.distanceTo(player.pos);
+    const contactDist = player.bodyRadius + c.def.rad*0.7 + 0.3;
+    if(d > contactDist*2.2) continue;
+    if(d < contactDist){
+      if(c.def.tier <= player.eatTier){
+        eatCreature(c);
+      } else if(c.def.tier <= player.eatTier+1 && player.boosting && player.ramCD<=0){
+        ramCreature(c);
+      } else if(c.hp!==undefined && c.def.dmg && c.attackCd<=0){
+        damagePlayer(c.def.dmg);
+        c.attackCd = c.def.atkCd||1.5;
+      }
+    }
+  }
+}
+
+function eatCreature(c){
+  const def = c.def;
+  releaseCreature(c);
+  const gained = Math.round(def.xp*player.xpMul);
+  const coinsGained = Math.round(def.coin*player.coinMul);
+  profile.xp += gained; profile.coins += coinsGained; player.runCoins += coinsGained;
+  player.hunger = Math.min(player.maxHunger, player.hunger + 8 + def.rad*10);
+  profile.stats.totalEaten++;
+  if(def.tier >= player.biggestMealTier){ player.biggestMealTier = def.tier; player.biggestMealName = def.name; }
+  missionEvent('eatTier', {tier:def.tier});
+  SFX.eat(); pulseCoin(); markDirty();
+  checkLevelUp();
+}
+
+function ramCreature(c){
+  player.ramCD = 0.5;
+  c.hp -= player.biteDamage;
+  SFX.ram(); shakeCamera(0.15,0.25);
+  if(c.hp<=0) defeatCreature(c);
+}
+function defeatCreature(c){
+  const def = c.def;
+  releaseCreature(c);
+  const gained = Math.round(def.xp*2.4*player.xpMul);
+  const coinsGained = Math.round(def.coin*2.4*player.coinMul);
+  profile.xp += gained; profile.coins += coinsGained; player.runCoins += coinsGained;
+  if(def.tier >= player.biggestMealTier){ player.biggestMealTier = def.tier; player.biggestMealName = def.name; }
+  toast(`Predator Defeated: ${def.name}  +${coinsGained} Pearls`, 'gold');
+  missionEvent('defeatPred', {});
+  SFX.defeat(); shakeCamera(0.3,0.4); markDirty();
+  checkLevelUp();
+}
+
+function checkLevelUp(){
+  let leveled=false;
+  while(profile.level<10 && profile.xp >= LEVELS[profile.level].xp){
+    profile.level++;
+    leveled=true;
+  }
+  if(leveled){
+    computePlayerStats();
+    player.health = player.maxHealth;
+    player.hunger = player.maxHunger;
+    const lv = LEVELS[profile.level-1];
+    toast(`Level Up! You are now a ${lv.name}`, 'gold');
+    SFX.levelUp();
+    shakeCamera(0.25,0.35);
+    if(navigator.vibrate) navigator.vibrate([40,40,40]);
+    updateHUD();
+    persistProfile();
+  }
+}
+
+/* ============================== TREASURE ============================== */
+function updateTreasure(dt){
+  for(let i=0;i<treasures.length;i++){
+    const t = treasures[i];
+    if(t.userData.collected){
+      t.userData.respawnT = (t.userData.respawnT||0) - dt;
+      if(t.userData.respawnT<=0) respawnTreasure(t);
+      continue;
+    }
+    t.userData.pearl.rotation.y += dt*1.4;
+    t.userData.pearl.position.y = 0.7 + Math.sin(performance.now()*0.002)*0.08;
+    const d = t.position.distanceTo(player.pos);
+    if(d < player.bodyRadius+1.0){
+      t.userData.collected = true;
+      t.userData.respawnT = 42;
+      t.visible = false;
+      const coinsGained = Math.round(rand(14,22)*player.coinMul);
+      profile.coins += coinsGained; player.runCoins += coinsGained;
+      toast(`Treasure Found! +${coinsGained} Pearls`, 'gold');
+      missionEvent('treasure', {});
+      SFX.treasure(); pulseCoin(); markDirty();
+    }
+  }
+}
+
+/* ============================== BOSS: THE ABYSSAL MAW ============================== */
+let boss=null;
+let bossCooldownUntil = 0;
+let bossAlertPending = false;
+let bossArenaCenter = new THREE.Vector3();
+
+function trySpawnBoss(){
+  if(boss || profile.level<8) return;
+  if(currentZone.id!=='abyss') return;
+  if(performance.now()/1000 < bossCooldownUntil) return;
+  spawnBoss();
+}
+function spawnBoss(){
+  boss = new Creature(BOSS_DEF);
+  boss.reset();
+  boss.state='patrol';
+  const [ox,oz] = ringPos(70,110);
+  boss.pos.set(player.pos.x+ox, ZONES.abyss.yLow+18, player.pos.z+oz);
+  boss.mesh.position.copy(boss.pos);
+  boss.mesh.visible=true;
+  bossArenaCenter.copy(boss.pos);
+  boss.hp = BOSS_DEF.hp; boss.maxHp = BOSS_DEF.hp;
+  boss.telegraph=0; boss.attackCd=2;
+  activeList.push(boss);
+  ensureBossBar();
+  bossBarEl.style.display='block';
+  updateBossBar();
+  toast('The Abyssal Maw stirs in the dark\u2026', 'warn');
+  SFX.bossAlert();
+  if(navigator.vibrate) navigator.vibrate([80,60,120]);
+}
+function ensureBossBar(){
+  if(bossBarEl) return;
+  bossBarEl = document.createElement('div');
+  bossBarEl.id='boss-bar';
+  bossBarEl.style.cssText = 'position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(320px,80vw);pointer-events:none;';
+  bossBarEl.innerHTML = '<div style="font-family:\'Fredoka\',sans-serif;font-size:12px;text-align:center;letter-spacing:.05em;color:#ffb3b3;text-shadow:0 2px 6px rgba(0,0,0,.6);margin-bottom:3px;">THE ABYSSAL MAW</div>'+
+    '<div style="height:11px;border-radius:7px;background:rgba(0,0,0,.4);border:1px solid rgba(255,92,92,.5);overflow:hidden;"><div id="boss-hp-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#ff5c5c,#ff9b4d);transition:width .2s;"></div></div>';
+  document.getElementById('hud').appendChild(bossBarEl);
+  bossHpFillEl = document.getElementById('boss-hp-fill');
+}
+function updateBossBar(){
+  if(!bossHpFillEl || !boss) return;
+  bossHpFillEl.style.width = Math.max(0,(boss.hp/boss.maxHp*100))+'%';
+}
+
+const _bfwd = new THREE.Vector3();
+function updateBoss(dt){
+  if(!boss) return;
+  const d = boss.pos.distanceTo(player.pos);
+  const phase2 = boss.hp < boss.maxHp*0.5;
+
+  if(d > 260){ despawnBoss(false); return; }
+
+  boss.attackCd -= dt;
+  switch(boss.state){
+    case 'patrol': {
+      if(boss.wanderTarget.lengthSq()===0 || boss.pos.distanceTo(boss.wanderTarget)<4){
+        boss.wanderTarget.set(bossArenaCenter.x+rand(-40,40), clamp(bossArenaCenter.y+rand(-14,14),Y_BOTTOM+8,ZONES.abyss.yHigh-6), bossArenaCenter.z+rand(-40,40));
+      }
+      _bfwd.subVectors(boss.wanderTarget, boss.pos).normalize();
+      boss.vel.lerp(_bfwd.multiplyScalar(BOSS_DEF.speed*0.5), dt*1.5);
+      if(d < 65 && boss.attackCd<=0){ boss.state='telegraph'; boss.telegraph = phase2?0.55:0.9; }
+      break;
+    }
+    case 'telegraph': {
+      boss.vel.multiplyScalar(0.9);
+      boss.telegraph -= dt;
+      if(boss.telegraph<=0){
+        boss.state='lunge'; boss.lungeT = 1.1;
+        _bfwd.subVectors(player.pos, boss.pos).normalize();
+        boss.lungeDir = _bfwd.clone();
+        SFX.bite();
+      }
+      break;
+    }
+    case 'lunge': {
+      boss.lungeT -= dt;
+      boss.vel.copy(boss.lungeDir).multiplyScalar(BOSS_DEF.speed*2.1);
+      if(boss.pos.distanceTo(player.pos) < player.bodyRadius+BOSS_DEF.rad*0.8 && player.invuln<=0){
+        damagePlayer(phase2?BOSS_DEF.dmg*1.3:BOSS_DEF.dmg);
+        boss.state='recover'; boss.recoverT=1.3; boss.lungeT=0;
+      }
+      if(boss.lungeT<=0){ boss.state='recover'; boss.recoverT=1.3; }
+      break;
+    }
+    case 'recover': {
+      boss.recoverT -= dt;
+      boss.vel.multiplyScalar(0.92);
+      if(boss.recoverT<=0){ boss.state='patrol'; boss.attackCd = phase2?1.6:2.4; }
+      break;
+    }
+  }
+  boss.pos.addScaledVector(boss.vel, dt);
+  boss.pos.y = clamp(boss.pos.y, Y_BOTTOM+6, ZONES.abyss.yHigh-4);
+  boss.mesh.position.copy(boss.pos);
+  if(boss.vel.lengthSq()>0.05){
+    _tgt.copy(boss.pos).addScaledVector(boss.vel,0.5);
+    boss.mesh.up.set(0,1,0);
+    boss.mesh.lookAt(_tgt);
+  }
+  const eyeGlow = boss.state==='telegraph' ? (0.5+Math.sin(performance.now()*0.03)*0.5) : 0.15;
+  boss.mesh.children.forEach(ch=>{ if(ch.material && ch.material.emissive){ ch.material.emissiveIntensity = eyeGlow; } });
+
+  // player ram-to-damage on boss
+  const dd = boss.pos.distanceTo(player.pos);
+  if(dd < player.bodyRadius+BOSS_DEF.rad*0.75 && player.boosting && player.ramCD<=0){
+    player.ramCD=0.4;
+    boss.hp -= player.biteDamage*1.1;
+    SFX.ram(); shakeCamera(0.2,0.3);
+    updateBossBar();
+    if(boss.hp<=0){ defeatBoss(); }
+  }
+}
+function despawnBoss(defeated){
+  if(!boss) return;
+  const i = activeList.indexOf(boss); if(i>=0) activeList.splice(i,1);
+  scene.remove(boss.mesh);
+  boss=null;
+  if(bossBarEl) bossBarEl.style.display='none';
+  bossCooldownUntil = performance.now()/1000 + (defeated?60:20);
+}
+function defeatBoss(){
+  const coinsGained = Math.round(BOSS_DEF.coin*player.coinMul);
+  const xpGained = Math.round(BOSS_DEF.xp*player.xpMul);
+  profile.coins += coinsGained; player.runCoins += coinsGained;
+  profile.xp += xpGained;
+  profile.stats.bossKills = (profile.stats.bossKills||0)+1;
+  player.biggestMealName = BOSS_DEF.name;
+  player.biggestMealTier = 6;
+  toast(`THE ABYSSAL MAW IS DEFEATED! +${coinsGained} Pearls`, 'gold');
+  missionEvent('boss', {});
+  SFX.defeat(); shakeCamera(0.45,0.6);
+  if(navigator.vibrate) navigator.vibrate([100,60,100,60,160]);
+  markDirty(); persistProfile();
+  checkLevelUp();
+  despawnBoss(true);
+}
+
+/* ============================== MISSIONS ============================== */
+let activeMissions=[];
+function refillMissions(){
+  let guard=0;
+  while(activeMissions.length<3 && guard<40){
+    guard++;
+    const candidates = MISSION_POOL.filter(def=>{
+      if(activeMissions.some(m=>m.def.key===def.key)) return false;
+      if(def.once && profile.achievements[def.key]) return false;
+      if(def.key==='defeat_boss' && profile.level<8) return false;
+      return true;
+    });
+    if(candidates.length===0) break;
+    const def = choice(candidates);
+    activeMissions.push({def, progress:0});
+  }
+  renderObjectives();
+}
+function missionEvent(type, payload){
+  let changed=false;
+  activeMissions.forEach(m=>{
+    if(m.progress>=m.def.target) return;
+    if(m.def.type!==type) return;
+    if(type==='eatTier' && payload.tier!==m.def.tier) return;
+    if(type==='zone' && payload.zone!==m.def.zone) return;
+    if(type==='survive'){ m.progress = payload.value; }
+    else { m.progress += 1; }
+    if(m.progress>=m.def.target) completeMission(m);
+    changed=true;
+  });
+  if(changed) renderObjectives();
+}
+function completeMission(m){
+  m.progress = m.def.target;
+  profile.coins += m.def.reward; player.runCoins += m.def.reward;
+  if(m.def.once) profile.achievements[m.def.key]=true;
+  toast(`Mission Complete: ${m.def.text(m.progress)}  +${m.def.reward} Pearls`, 'gold');
+  SFX.mission(); pulseCoin(); markDirty();
+  setTimeout(()=>{
+    activeMissions = activeMissions.filter(x=>x!==m);
+    refillMissions();
+  }, 1500);
+}
+function renderObjectives(){
+  objListEl.innerHTML = activeMissions.map(m=>{
+    const done = m.progress>=m.def.target;
+    return `<div class="obj-line${done?' done':''}">${m.def.text(m.progress)}</div>`;
+  }).join('');
+}
+
+/* ============================== HUD / TOASTS / MINIMAP ============================== */
+const healthFillEl = document.getElementById('health-fill');
+const hungerFillEl = document.getElementById('hunger-fill');
+const coinNumEl = document.getElementById('coin-num');
+const coinPillEl = document.querySelector('.coin-pill');
+const lvNumEl = document.getElementById('lv-num');
+const lvTagEl = document.getElementById('lv-tag');
+const zonePillEl = document.getElementById('zone-pill');
+const objListEl = document.getElementById('obj-list');
+const zoneToastEl = document.getElementById('zone-toast');
+const toastContainer = document.getElementById('toast-container');
+const vignetteEl = document.getElementById('vignette');
+const boostBtnEl = document.getElementById('boost-btn');
+
+function updateHUD(){
+  healthFillEl.style.width = clamp(player.health/player.maxHealth*100,0,100)+'%';
+  hungerFillEl.style.width = clamp(player.hunger/player.maxHunger*100,0,100)+'%';
+  coinNumEl.textContent = profile.coins;
+  const lv = LEVELS[profile.level-1];
+  lvNumEl.textContent = lv.n;
+  lvTagEl.textContent = lv.tag;
+  boostBtnEl.style.setProperty('--stam', Math.round(player.stamina/player.maxStamina*100));
+  if(boss) updateBossBar();
+}
+function pulseCoin(){
+  coinPillEl.style.transition='transform .15s ease';
+  coinPillEl.style.transform='scale(1.15)';
+  setTimeout(()=>coinPillEl.style.transform='scale(1)',150);
+}
+let zoneToastTimer=null;
+function showZoneToast(z){
+  zoneToastEl.innerHTML = z.name+'<small>'+z.sub+'</small>';
+  zoneToastEl.classList.add('show');
+  clearTimeout(zoneToastTimer);
+  zoneToastTimer = setTimeout(()=>zoneToastEl.classList.remove('show'), 2200);
+}
+function toast(msg, cls){
+  while(toastContainer.children.length>=4) toastContainer.removeChild(toastContainer.firstChild);
+  const el = document.createElement('div');
+  el.className = 'toast'+(cls?(' '+cls):'');
+  el.textContent = msg;
+  toastContainer.appendChild(el);
+  setTimeout(()=>{ el.classList.add('fade'); setTimeout(()=>el.remove(),400); }, 2000);
+}
+
+const mmCtx = document.getElementById('minimap').getContext('2d');
+let mmAccum=0;
+function updateMinimap(dt){
+  mmAccum += dt;
+  if(mmAccum<0.12) return;
+  mmAccum=0;
+  const W=120,H=120,cx=W/2,cy=H/2, RADIUS=130, SCALE=(W/2-8)/RADIUS;
+  mmCtx.clearRect(0,0,W,H);
+  mmCtx.save();
+  mmCtx.beginPath(); mmCtx.arc(cx,cy,W/2,0,Math.PI*2); mmCtx.clip();
+  mmCtx.fillStyle = '#0a1220';
+  mmCtx.fillRect(0,0,W,H);
+  const yaw = player.yaw;
+  const cosY=Math.cos(-yaw), sinY=Math.sin(-yaw);
+  for(let i=0;i<activeList.length;i++){
+    const c = activeList[i];
+    if(!c.active) continue;
+    const dx = c.pos.x-player.pos.x, dz = c.pos.z-player.pos.z;
+    const dd = Math.hypot(dx,dz);
+    if(dd>RADIUS) continue;
+    const rx = dx*cosY - dz*sinY, rz = dx*sinY + dz*cosY;
+    const px = cx+rx*SCALE, py = cy+rz*SCALE;
+    mmCtx.beginPath();
+    const edible = c.def.tier<=player.eatTier;
+    mmCtx.fillStyle = c===boss ? '#ff5c5c' : (edible? '#8fe9e0' : '#ff9b4d');
+    mmCtx.arc(px,py, c===boss?4:2, 0, Math.PI*2);
+    mmCtx.fill();
+  }
+  for(let i=0;i<treasures.length;i++){
+    const t=treasures[i]; if(t.userData.collected) continue;
+    const dx=t.position.x-player.pos.x, dz=t.position.z-player.pos.z;
+    const dd=Math.hypot(dx,dz); if(dd>RADIUS) continue;
+    const rx = dx*cosY-dz*sinY, rz=dx*sinY+dz*cosY;
+    mmCtx.beginPath(); mmCtx.fillStyle='#ffd37a'; mmCtx.arc(cx+rx*SCALE,cy+rz*SCALE,2.4,0,Math.PI*2); mmCtx.fill();
+  }
+  // player marker
+  mmCtx.fillStyle = '#4defd8';
+  mmCtx.beginPath();
+  mmCtx.moveTo(cx, cy-7); mmCtx.lineTo(cx-5,cy+6); mmCtx.lineTo(cx+5,cy+6); mmCtx.closePath(); mmCtx.fill();
+  mmCtx.restore();
+}
+
+/* ============================== CAMERA ============================== */
+const camDesired = new THREE.Vector3();
+const camLookTarget = new THREE.Vector3();
+let shakeTime=0, shakeMag=0;
+const BASE_FOV=62, BOOST_FOV=74;
+function shakeCamera(mag, dur){ shakeMag=Math.max(shakeMag,mag); shakeTime=Math.max(shakeTime,dur); }
+
+function updateCamera(dt){
+  const back = -9.5, height=3.4;
+  const flatFwd = new THREE.Vector3(Math.sin(player.yaw)*Math.cos(player.pitch*0.4), 0, Math.cos(player.yaw)*Math.cos(player.pitch*0.4));
+  camDesired.copy(player.pos).addScaledVector(flatFwd, back).addScaledVector(player.forward, -1.5);
+  camDesired.y += height - player.pitch*3.0;
+
+  camera.position.lerp(camDesired, clamp(dt*3.2,0,1));
+  camLookTarget.copy(player.pos).addScaledVector(player.forward, 9);
+  const lookPoint = camLookTarget;
+  camera.up.set(0,1,0);
+
+  if(shakeTime>0){
+    shakeTime -= dt;
+    const s = shakeMag*(shakeTime>0?1:0);
+    camera.position.x += rand(-s,s); camera.position.y += rand(-s,s); camera.position.z += rand(-s,s);
+    if(shakeTime<=0) shakeMag=0;
+  }
+  camera.position.y = Math.min(camera.position.y, Y_TOP-1);
+  camera.position.y = Math.max(camera.position.y, Y_BOTTOM+3);
+  camera.lookAt(lookPoint);
+
+  const targetFov = player.boosting ? BOOST_FOV : BASE_FOV;
+  camera.fov = lerp(camera.fov, targetFov, clamp(dt*3,0,1));
+  camera.updateProjectionMatrix();
+}
+
+/* ============================== DECOR ANIMATION ============================== */
+function updateDecor(dt){
+  const t = performance.now()*0.001;
+  for(let i=0;i<kelpFronds.length;i++){
+    const k = kelpFronds[i];
+    if(k.position.distanceTo(player.pos) > 100) continue;
+    k.rotation.z = Math.sin(t*0.9 + k.userData.sway)*0.12;
+    k.rotation.x = Math.cos(t*0.7 + k.userData.sway)*0.06;
+  }
+  for(let i=0;i<bubbles.length;i++){
+    const b = bubbles[i];
+    b.position.y += b.userData.speed*dt;
+    b.position.x += Math.sin(t*1.5+b.userData.drift)*dt*0.4;
+    if(b.position.y > Y_TOP-1 || b.position.distanceTo(player.pos)>90){ resetBubble(b,false); }
+  }
+  for(let i=0;i<sunRayMeshes.length;i++){
+    sunRayMeshes[i].material.opacity = 0.05*clamp(1-(-player.pos.y)/50,0,1);
+    sunRayMeshes[i].position.x = player.pos.x + Math.sin(t*0.05+i)*90;
+    sunRayMeshes[i].position.z = player.pos.z + Math.cos(t*0.05+i)*90;
+  }
+  if(floorMesh){ floorMesh.position.x = 0; floorMesh.position.z = 0; }
+}
+
+/* ============================== MENU SWIMMERS (decorative) ============================== */
+function initMenuSwimmers(){
+  const style = document.createElement('style');
+  style.textContent = `@keyframes swimAcross{from{transform:translateX(-10vw) translateY(0);}to{transform:translateX(110vw) translateY(-18px);}}
+  .menu-fish{position:absolute; font-size:22px; opacity:.35; animation:swimAcross linear infinite;}`;
+  document.head.appendChild(style);
+  const wrap = document.getElementById('menu-swimmers');
+  const glyphs = ['\u{1F41F}','\u{1F420}','\u{1F421}'];
+  for(let i=0;i<6;i++){
+    const el = document.createElement('div');
+    el.className='menu-fish';
+    el.textContent = choice(glyphs);
+    el.style.top = rand(8,88)+'%';
+    el.style.animationDuration = rand(10,22)+'s';
+    el.style.animationDelay = rand(-10,0)+'s';
+    el.style.transform = 'scaleX(-1)';
+    wrap.appendChild(el);
+  }
+}
+
+/* ============================== MODALS ============================== */
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function anyModalOpen(){ return !!document.querySelector('.modal-wrap.show'); }
+document.querySelectorAll('[data-close]').forEach(el=>{
+  el.addEventListener('click', ()=>{ SFX.click(); closeModal(el.dataset.close); });
+});
+
+/* ---- shop ---- */
+const shopListEl = document.getElementById('shop-list');
+function renderShop(){
+  shopListEl.innerHTML='';
+  UPGRADES.forEach(u=>{
+    const lvl = profile.upgrades[u.id]||0;
+    const maxed = lvl>=u.max;
+    const cost = maxed?0:upgradeCost(u,lvl);
+    const afford = !maxed && profile.coins>=cost;
+    const row = document.createElement('div');
+    row.className='shop-row';
+    let pips='';
+    for(let i=0;i<u.max;i++) pips += `<div class="pip${i<lvl?' filled':''}"></div>`;
+    row.innerHTML = `<div class="icon">${u.icon}</div>
+      <div class="info"><div class="name">${u.name}</div><div class="desc">${u.desc}</div><div class="pips">${pips}</div></div>
+      <button class="buy-btn" ${(maxed||!afford)?'disabled':''}>${maxed?'MAX':cost+' \u{1FA99}'}</button>`;
+    const btn = row.querySelector('.buy-btn');
+    if(!maxed){
+      btn.addEventListener('click', ()=>{
+        if(profile.coins>=cost){
+          profile.coins -= cost;
+          profile.upgrades[u.id] = lvl+1;
+          applyUpgrades();
+          SFX.click(); markDirty(); persistProfile();
+          renderShop(); updateHUD(); renderMenuStats();
+          toast(`${u.name} upgraded!`, 'gold');
+        }
+      });
+    }
+    shopListEl.appendChild(row);
+  });
+}
+document.getElementById('shop-btn-menu').addEventListener('click', ()=>{ renderShop(); openModal('shop-modal'); });
+document.getElementById('shop-btn-pause').addEventListener('click', ()=>{ renderShop(); openModal('shop-modal'); });
+document.getElementById('howto-btn').addEventListener('click', ()=>openModal('tutorial-modal'));
+document.getElementById('howto-btn-pause').addEventListener('click', ()=>openModal('tutorial-modal'));
+
+/* ---- pause / quit ---- */
+document.getElementById('pause-btn').addEventListener('click', ()=>{ SFX.click(); openModal('pause-modal'); });
+document.getElementById('quit-btn').addEventListener('click', ()=>{
+  closeModal('pause-modal');
+  running=false;
+  persistProfile();
+  document.getElementById('hud').style.display='none';
+  document.getElementById('controls').style.display='none';
+  if(bossBarEl) bossBarEl.style.display='none';
+  despawnBoss(false);
+  document.getElementById('menu').style.display='flex';
+  renderMenuStats();
+});
+const soundToggle = document.getElementById('sound-toggle');
+const soundLinkEl = document.getElementById('sound-link');
+function updateSoundUI(){
+  soundToggle.classList.toggle('on', profile.settings.sound);
+  soundLinkEl.textContent = 'Sound: '+(profile.settings.sound?'On':'Off');
+}
+soundToggle.addEventListener('click', ()=>{
+  profile.settings.sound = !profile.settings.sound;
+  SFX.setEnabled(profile.settings.sound);
+  updateSoundUI(); markDirty(); persistProfile();
+});
+soundLinkEl.addEventListener('click', ()=>{
+  profile.settings.sound = !profile.settings.sound;
+  SFX.setEnabled(profile.settings.sound);
+  updateSoundUI(); markDirty(); persistProfile();
+});
+
+/* ---- reset progress (double-tap confirm; avoids window.confirm sandbox issues) ---- */
+const resetLinkEl = document.getElementById('reset-link');
+let resetArmed=false, resetTimer=null;
+resetLinkEl.addEventListener('click', ()=>{
+  if(!resetArmed){
+    resetArmed=true;
+    resetLinkEl.textContent='Tap again to confirm';
+    resetLinkEl.classList.add('confirming');
+    resetTimer = setTimeout(()=>{ resetArmed=false; resetLinkEl.textContent='Reset Progress'; resetLinkEl.classList.remove('confirming'); }, 3000);
+  } else {
+    clearTimeout(resetTimer);
+    resetArmed=false;
+    resetLinkEl.textContent='Reset Progress';
+    resetLinkEl.classList.remove('confirming');
+    profile = defaultProfile();
+    applyUpgrades();
+    persistProfile();
+    renderMenuStats();
+    updateSoundUI();
+    toast('Progress reset.');
+  }
+});
+
+/* ---- game over ---- */
+document.getElementById('respawn-btn').addEventListener('click', ()=>{
+  closeModal('gameover-modal');
+  respawnPlayer();
+  updateHUD();
+});
+document.getElementById('go-menu-btn').addEventListener('click', ()=>{
+  closeModal('gameover-modal');
+  respawnPlayer();
+  running=false;
+  document.getElementById('hud').style.display='none';
+  document.getElementById('controls').style.display='none';
+  if(bossBarEl) bossBarEl.style.display='none';
+  despawnBoss(false);
+  document.getElementById('menu').style.display='flex';
+  renderMenuStats();
+});
+
+/* ---- menu stats ---- */
+function renderMenuStats(){
+  const lv = LEVELS[profile.level-1];
+  document.getElementById('menu-level-pill').textContent = `Lv ${lv.n} ${lv.name}`;
+  document.getElementById('menu-coin-pill').textContent = `${profile.coins} Pearls`;
+}
+
+/* ---- play ---- */
+document.getElementById('play-btn').addEventListener('click', ()=>{
+  SFX.init(); SFX.resume();
+  document.getElementById('menu').style.display='none';
+  document.getElementById('hud').style.display='block';
+  document.getElementById('controls').style.display='block';
+  startRun();
+});
+function startRun(){
+  respawnPlayer();
+  activeMissions=[];
+  refillMissions();
+  currentZone = zoneForY(player.pos.y);
+  zonePillEl.textContent = currentZone.name;
+  showZoneToast(currentZone);
+  updateHUD();
+}
+
+/* ============================== MAIN LOOP ============================== */
+let running=false;
+let last = performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  let dt = (now-last)/1000; last=now;
+  if(dt>0.05) dt=0.05;
+
+  const simulate = running && !anyModalOpen() && !player.dead;
+  if(simulate){
+    updatePlayer(dt);
+    spawnTick(dt);
+    updateCreatures(dt);
+    updateTreasure(dt);
+    trySpawnBoss();
+    updateBoss(dt);
+    updateDecor(dt);
+    updateHUD();
+    updateMinimap(dt);
+  }
+  updateCamera(dt);
+  renderer.render(scene, camera);
+}
+
+/* ============================== BOOT ============================== */
+async function boot(){
+  await loadProfile();
+  initThree();
+  buildWorld();
+  initPlayer();
+  initInput();
+  applyUpgrades();
+  player.health = player.maxHealth; player.hunger=player.maxHunger; player.stamina=player.maxStamina;
+  initMenuSwimmers();
+  renderMenuStats();
+  updateSoundUI();
+  SFX.setEnabled(profile.settings.sound);
+  document.getElementById('loading').style.display='none';
+  document.getElementById('menu').style.display='flex';
+  requestAnimationFrame(loop);
+}
+window.addEventListener('load', boot);
+
+})();
+</script>
+</body>
+</html>
