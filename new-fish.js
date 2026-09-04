@@ -20,7 +20,7 @@ window.addCustomFish = function (fish) {
 window.addCustomFish({
   id: 'gold_blue',
   name: 'Gold_blue',
-  png: './custom-fish-clean.png',
+  png: 'golden_blue.png',
   r: 22,
   pngWidth: 70,
   pngHeight: 50,
