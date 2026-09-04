@@ -25,7 +25,7 @@ window.addCustomFish({
   name: 'My Custom Fish',
 
   // PNG FILE IN YOUR MAIN GITHUB FOLDER:
-  png: './my-custom-fish.png',
+  png: 'golden_gumpy.png',
 
   // Hitbox / game size:
   r: 22,
